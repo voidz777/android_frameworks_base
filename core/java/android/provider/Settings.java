@@ -3126,6 +3126,11 @@ public final class Settings {
          */
         public static final String STATUS_BAR_SHOW_CARRIER = "status_bar_show_carrier";
 
+        /* Network speed indicator
+         * @hide
+         */
+        public static final String STATUS_BAR_TRAFFIC = "status_bar_traffic";
+
         /** Whether to allow one finger quick settings expansion on the right side of the statusbar.
          *
          * @hide
