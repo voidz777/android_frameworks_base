@@ -2291,6 +2291,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.System.STATUS_BAR_NOTIF_COUNT,
                     R.integer.def_notif_count);
 
+            loadIntegerSetting(stmt, Settings.System.STATUS_BAR_BATTERY_STYLE,
+                    R.integer.def_battery_style);
+
             loadHeadsUpSetting(stmt);
 
         } finally {
