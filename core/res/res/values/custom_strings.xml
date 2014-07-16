@@ -29,4 +29,8 @@
          be a confirmation dialog.  This is the message. -->
     <string name="reboot_confirm" product="tablet">Your tablet will reboot.</string>
     <string name="reboot_confirm" product="default">Your phone will reboot.</string>
+
+    <!-- Text of the checkbox for the permission confirmation dialog to remember the user's choice. [CHAR LIMIT=40] -->
+    <string name="permission_remember_choice">Remember</string>
+    <string name="permission">Permission</string>
 </resources>
