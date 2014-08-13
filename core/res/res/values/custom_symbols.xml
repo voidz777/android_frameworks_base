@@ -74,4 +74,8 @@
 
   <!-- Configuartion to set zen mode when silent mode is on -->
   <java-symbol type="bool" name="config_setZenModeWhenSilentModeOn" />
+
+  <!-- Last app switch animations -->
+  <java-symbol type="anim" name="last_app_in" />
+  <java-symbol type="anim" name="last_app_out" />
 </resources>
