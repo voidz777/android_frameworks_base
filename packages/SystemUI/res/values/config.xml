@@ -249,5 +249,9 @@
 
     <!-- Zen toast visibility duration -->
     <integer name="zen_toast_visible_duration">500</integer>
+
+    <!-- number of saved networks | can be increased with an overlay for wifi only devices -->
+    <integer name="wifi_notifications_remembered_connections">8</integer>
+
 </resources>
 

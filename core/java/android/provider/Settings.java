@@ -3127,6 +3127,16 @@ public final class Settings {
         public static final String NAVIGATION_BAR_SHOW = "navigation_bar_show";
 
         /**
+          * Displays a notification when wifi network has changed
+          * 0 - default (off)
+          * 1 - toast
+          * 2 - notification
+          * 3 - notification with sound
+          * @hide
+          */
+         public static final String WIFI_NETWORK_NOTIFICATIONS = "wifi_network_notifications";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
