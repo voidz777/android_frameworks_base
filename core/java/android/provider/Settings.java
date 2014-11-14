@@ -6105,6 +6105,11 @@ public final class Settings {
          */
         public static final String SLEEP_TIMEOUT = "sleep_timeout";
 
+         /** Protected Components
+         * @hide
+         */
+        public static final String PROTECTED_COMPONENTS = "protected_components";
+
         /**
          * Whether newly installed apps should run with privacy guard by default
          * @hide
