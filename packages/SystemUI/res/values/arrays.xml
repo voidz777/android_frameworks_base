@@ -37,4 +37,9 @@
         <item>157</item><item>334</item>
         <item>0</item>  <item>334</item>
     </array>
+
+    <!--no sim-->
+    <string-array name="no_sim">
+        <item>drawable/stat_sys_no_sim</item>
+    </string-array>
 </resources>
