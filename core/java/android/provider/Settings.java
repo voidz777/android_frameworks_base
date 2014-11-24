@@ -2810,6 +2810,18 @@ public final class Settings {
          public static final String VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
 
         /**
+         * Lock Screen battery %
+         * @hide
+         */
+        public static final String LOCK_SCREEN_SHOW_BATTERY_PERCENT = "lock_screen_show_battery_percent";
+
+        /**
+         * Lock Screen carrier
+         * @hide
+         */
+        public static final String LOCK_SCREEN_SHOW_CARRIER = "lock_screen_show_carrier";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
