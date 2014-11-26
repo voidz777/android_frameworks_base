@@ -68,4 +68,7 @@
 
   <!-- Package Manager -->
   <java-symbol type="array" name="config_disabledComponents" />
+
+  <!-- Doze mode -->
+  <java-symbol type="bool" name="config_doze_enabled_by_default" />
 </resources>
