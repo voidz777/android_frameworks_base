@@ -52,6 +52,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private boolean mBatteryListening;
 
     private boolean mShowCarrierLabel;
+    private boolean mShowBatteryText;
 
     private TextView mCarrierLabel;
     private View mSystemIconsSuperContainer;
@@ -68,9 +69,22 @@ public class KeyguardStatusBarView extends RelativeLayout
     private Handler mHandler = new Handler();
     private SettingsObserver mSettingsObserver;
 
+    private ContentObserver mObserver = new ContentObserver(new Handler()) {
+        public void onChange(boolean selfChange, Uri uri) {
+            loadShowBatteryTextSetting();
+            updateVisibilities();
+        }
+    };
+
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSettingsObserver = new SettingsObserver(mHandler);
+        loadShowBatteryTextSetting();
+    }
+
+    private void loadShowBatteryTextSetting() {
+        mShowBatteryText = 2 == Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0);
     }
 
     @Override
@@ -85,6 +99,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_slow_in);
         updateUserSwitcher();
+        updateVisibilities();
     }
 
     @Override
@@ -113,7 +128,8 @@ public class KeyguardStatusBarView extends RelativeLayout
         } else if (mMultiUserSwitch.getParent() == this && mKeyguardUserSwitcherShowing) {
             removeView(mMultiUserSwitch);
         }
-        mBatteryLevel.setVisibility(mBatteryCharging ? View.VISIBLE : View.GONE);
+        mBatteryLevel.setVisibility(
+                (mBatteryCharging || mShowBatteryText) ? View.VISIBLE : View.GONE);
         mCarrierLabel.setVisibility(mShowCarrierLabel ? View.VISIBLE : View.GONE);
     }
 
@@ -279,6 +295,22 @@ public class KeyguardStatusBarView extends RelativeLayout
             mShowCarrierLabel = Settings.System.getInt(
                     resolver, Settings.System.LOCK_SCREEN_SHOW_CARRIER, 0) != 0;
             updateVisibilities();
+        }
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                "status_bar_show_battery_percent"), false, mObserver);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        if (mBatteryController != null) {
+            mBatteryController.removeStateChangedCallback(this);
         }
     }
 }
