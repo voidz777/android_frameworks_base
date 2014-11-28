@@ -1874,4 +1874,7 @@
     <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
+
+    <!-- Setting to false will disable CM's IME switcher implementation for tablets -->
+    <bool name="config_show_cmIMESwitcher">true</bool>
 </resources>
