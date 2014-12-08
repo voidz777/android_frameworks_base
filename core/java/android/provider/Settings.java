@@ -5269,6 +5269,12 @@ public final class Settings {
          */
         public static final String DEVELOPMENT_SHORTCUT = "development_shortcut";
 
+        /**
+         * Whether user is allowed to pull down quick settings on secure keyguard.
+         * @hide
+         */
+        public static final String STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD
+                = "status_bar_locked_on_secure_keyguard";
 
         /**
          * This are the settings to be backed up.
@@ -5323,7 +5329,8 @@ public final class Settings {
             SLEEP_TIMEOUT,
             PRIVACY_GUARD_DEFAULT,
             ADVANCED_REBOOT,
-            DEVELOPMENT_SHORTCUT
+            DEVELOPMENT_SHORTCUT,
+            STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD
         };
 
         /**
