@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/assets/res/any/strings.xml
+/* //device/apps/common/assets/res/any/colors.xml
 **
-** Copyright 2014, Euphoria-OS project
+** Copyright 2014, The Euphoria-OS Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_data_connection_HP">HSPA+</string>
+    <string-array name="telephony_data_type_sim">
+        <!--NETWORK_TYPE_HSPAP-->
+        <item>drawable/stat_sys_data_fully_connected_hp</item>
+    </string-array>
+
 </resources>
