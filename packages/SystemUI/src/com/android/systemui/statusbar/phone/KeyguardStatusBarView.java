@@ -51,7 +51,6 @@ public class KeyguardStatusBarView extends RelativeLayout
     private boolean mKeyguardUserSwitcherShowing;
     private boolean mBatteryListening;
 
-    private boolean mShowBattreryPercent;
     private boolean mShowCarrierLabel;
 
     private TextView mCarrierLabel;
@@ -114,7 +113,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         } else if (mMultiUserSwitch.getParent() == this && mKeyguardUserSwitcherShowing) {
             removeView(mMultiUserSwitch);
         }
-        mBatteryLevel.setVisibility(mBatteryCharging || mShowBattreryPercent ? View.VISIBLE : View.GONE);
+        mBatteryLevel.setVisibility(mBatteryCharging ? View.VISIBLE : View.GONE);
         mCarrierLabel.setVisibility(mShowCarrierLabel ? View.VISIBLE : View.GONE);
     }
 
@@ -261,8 +260,6 @@ public class KeyguardStatusBarView extends RelativeLayout
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.LOCK_SCREEN_SHOW_BATTERY_PERCENT), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LOCK_SCREEN_SHOW_CARRIER), false, this);
             update();
         }
@@ -279,8 +276,6 @@ public class KeyguardStatusBarView extends RelativeLayout
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
-            mShowBattreryPercent = Settings.System.getInt(
-                    resolver, Settings.System.LOCK_SCREEN_SHOW_BATTERY_PERCENT, 0) != 0;
             mShowCarrierLabel = Settings.System.getInt(
                     resolver, Settings.System.LOCK_SCREEN_SHOW_CARRIER, 0) != 0;
             updateVisibilities();
