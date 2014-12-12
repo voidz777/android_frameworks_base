@@ -86,7 +86,7 @@
     <string name="reboot_soft">Schneller Neustart</string>
 
     <!-- Title of dialog to confirm rebooting. -->
-    <string name="reboot_title">Nuestart</string>
+    <string name="reboot_title">Neustart</string>
 
     <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the device, there will
          be a confirmation dialog.  This is the message. -->
