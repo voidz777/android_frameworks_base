@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2014 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +17,27 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentUris;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import android.telephony.TelephonyManager;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.AlarmClock;
 import android.provider.CalendarContract;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.util.TypedValue;
@@ -51,6 +53,7 @@ import android.widget.Toast;
 
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.BatteryMeterView;
+import com.android.systemui.BatteryLevelTextView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
@@ -68,7 +71,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback,
         WeatherController.Callback {
 
-    private boolean mBatteryCharging;
     private boolean mExpanded;
     private boolean mListening;
 
@@ -92,7 +94,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private Switch mQsDetailHeaderSwitch;
     private ImageView mQsDetailHeaderProgress;
     private TextView mEmergencyCallsOnly;
-    private TextView mBatteryLevel;
+    private BatteryLevelTextView mBatteryLevel;
     private TextView mAlarmStatus;
     private TextView mWeatherLine1, mWeatherLine2;
 
@@ -145,31 +147,12 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private float mCurrentT;
     private boolean mShowingDetail;
 
-    private int mShowBatteryText;
-
-    private ContentObserver mObserver = new ContentObserver(new Handler()) {
-        public void onChange(boolean selfChange, Uri uri) {
-            loadShowBatteryTextSetting();
-            showHeadsUpButton();
-        }
-    };
     private SettingsObserver mSettingsObserver;
     private boolean mShowWeather;
+    private boolean mShowBatteryTextExpanded;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        loadShowBatteryTextSetting();
-        showHeadsUpButton();
-    }
-
-    private void loadShowBatteryTextSetting() {
-        mShowBatteryText = Settings.System.getInt(getContext().getContentResolver(),
-                Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0);
-    }
-
-    private void showHeadsUpButton() {
-        mShowHeadsUpButton = Settings.System.getInt(getContext().getContentResolver(),
-                Settings.System.HEADS_UP_SHOW_STATUS_BUTTON, 0) == 1;
     }
 
     @Override
@@ -202,7 +185,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
         mEmergencyCallsOnly = (TextView) findViewById(R.id.header_emergency_calls_only);
-        mBatteryLevel = (TextView) findViewById(R.id.battery_level);
+        mBatteryLevel = (BatteryLevelTextView) findViewById(R.id.battery_level_text);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
         mSignalCluster = findViewById(R.id.signal_cluster);
@@ -258,7 +241,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        FontSizeUtils.updateFontSize(mBatteryLevel, R.dimen.battery_level_text_size);
         FontSizeUtils.updateFontSize(mEmergencyCallsOnly,
                 R.dimen.qs_emergency_calls_only_text_size);
         FontSizeUtils.updateFontSize(mDateCollapsed, R.dimen.qs_date_collapsed_size);
@@ -326,6 +308,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
         ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
+        mBatteryLevel.setBatteryController(batteryController);
     }
 
     public void setNextAlarmController(NextAlarmController nextAlarmController) {
@@ -401,8 +384,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateSignalClusterDetachment();
         }
         mEmergencyCallsOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly ? VISIBLE : GONE);
-        mBatteryLevel.setVisibility(((mExpanded && (mShowBatteryText == 0 || mBatteryCharging))
-                || mShowBatteryText == 2) ? View.VISIBLE : View.GONE);
+        mBatteryLevel.setForceShown(mExpanded && mShowBatteryTextExpanded);
+        mBatteryLevel.setVisibility(View.VISIBLE);
     }
 
     private void updateSignalClusterDetachment() {
@@ -482,8 +465,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-        mBatteryLevel.setText(getResources().getString(R.string.battery_level_template, level));
-        mBatteryCharging = charging;
+        // could not care less
     }
 
     @Override
@@ -856,6 +838,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         float batteryX;
         float batteryY;
         float batteryLevelAlpha;
+        float batteryLevelExpandedAlpha;
         float headsUpAlpha;
         float headsUpTranslation;
         float taskManagerAlpha;
@@ -892,6 +875,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
             float t3 = Math.max(0, t - 0.7f) / 0.3f;
             batteryLevelAlpha = v1.batteryLevelAlpha * (1 - t3) + v2.batteryLevelAlpha * t3;
+            batteryLevelExpandedAlpha =
+                    v1.batteryLevelExpandedAlpha * (1 - t3) + v2.batteryLevelExpandedAlpha * t3;
             headsUpAlpha = v1.headsUpAlpha * (1 - t3) + v2.headsUpAlpha * t3;
             taskManagerAlpha = v1.taskManagerAlpha * (1 - t3) + v2.taskManagerAlpha * t3;
             settingsAlpha = v1.settingsAlpha * (1 - t3) + v2.settingsAlpha * t3;
@@ -1003,24 +988,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     };
 
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
-                "status_bar_show_battery_percent"), false, mObserver);
-        getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
-                "heads_up_show_status_button"), false, mObserver);
-    }
-
-    @Override
-    public void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-
-        if (mBatteryController != null) {
-            mBatteryController.removeStateChangedCallback(this);
-        }
-    }
-
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
             super(handler);
@@ -1031,7 +998,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_SHOW_WEATHER), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_BATTERY_STYLE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.HEADS_UP_NOTIFICATION), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.HEADS_UP_SHOW_STATUS_BUTTON), false, this);
             update();
         }
 
@@ -1052,12 +1025,31 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
+            int currentUserId = ActivityManager.getCurrentUser();
+            int batteryStyle = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_BATTERY_STYLE, 0, currentUserId);
+            boolean showExpandedBatteryPercentage = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0, currentUserId) == 0;
+
+            switch (batteryStyle) {
+                case 4: //BATTERY_METER_GONE
+                case 6: //BATTERY_METER_TEXT
+                    showExpandedBatteryPercentage = false;
+                    break;
+                default:
+                    break;
+            }
+
+            mShowBatteryTextExpanded = showExpandedBatteryPercentage;
             mShowWeather = Settings.System.getInt(
                     resolver, Settings.System.STATUS_BAR_SHOW_WEATHER, 0) == 1;
             mHeadsUpEnabled = Settings.System.getInt(
                     resolver, Settings.System.HEADS_UP_NOTIFICATION, 1) == 1;
+            mShowHeadsUpButton = Settings.System.getInt(
+                    resolver, Settings.System.HEADS_UP_SHOW_STATUS_BUTTON, 0) == 1;
             updateVisibilities();
             updateHeadsUpButton();
+            requestCaptureValues();
         }
     }
 
