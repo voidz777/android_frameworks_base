@@ -287,6 +287,9 @@ public interface MetricsConstants {
     // Status bar settings
     public static final int STATUS_BAR_SETTINGS = 249;
 
+    // Navigation dimension settings
+    public static final int NAV_DIMENSION_SETTINGS = 250;
+
     // These constants must match those in the analytic pipeline, do not edit.
     // Add temporary values to the top of MetricsLogger instead.
 
