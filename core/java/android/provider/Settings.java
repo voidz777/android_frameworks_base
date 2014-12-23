@@ -3127,6 +3127,13 @@ public final class Settings {
         public static final String NAVIGATION_BAR_SHOW = "navigation_bar_show";
 
         /**
+         * Whether navigation bar is placed on the left side in landscape mode
+         *
+         * @hide
+         */
+        public static final String NAVBAR_LEFT_IN_LANDSCAPE = "navigation_bar_left";
+
+        /**
           * Displays a notification when wifi network has changed
           * 0 - default (off)
           * 1 - toast
