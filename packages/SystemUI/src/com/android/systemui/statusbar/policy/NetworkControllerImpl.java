@@ -92,8 +92,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
     int mDataTypeIconId;
     int mQSDataTypeIconId;
     int mAirplaneIconId;
-    int mNoSimIconId;
-    int mLastSimIconId;
     boolean mDataActive;
     boolean mNoSim;
     int mLastSignalLevel;
@@ -180,7 +178,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription);
         void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
                 String contentDescription, String typeContentDescription, boolean roaming,
-                boolean isTypeIconWide, int noSimIcon);
+                boolean isTypeIconWide);
         void setIsAirplaneMode(boolean is, int airplaneIcon);
     }
 
@@ -407,8 +405,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mContentDescriptionWimax,
                     mContentDescriptionDataType,
                     mDataTypeIconId == TelephonyIcons.ROAMING_ICON,
-                    false /* isTypeIconWide */,
-                    mNoSimIconId);
+                    false /* isTypeIconWide */ );
         } else {
             // normal mobile data
             cluster.setMobileDataIndicators(
@@ -418,8 +415,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mContentDescriptionPhoneSignal,
                     mContentDescriptionDataType,
                     mDataTypeIconId == TelephonyIcons.ROAMING_ICON,
-                    isTypeIconWide(mDataTypeIconId),
-                    mNoSimIconId);
+                    isTypeIconWide(mDataTypeIconId));
         }
         cluster.setIsAirplaneMode(mAirplaneMode, mAirplaneIconId);
     }
@@ -506,7 +502,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
             refreshLocale();
             updateAirplaneMode();
-            updateSimIcon();
             refreshViews();
         } else if (action.equals(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION) ||
                 action.equals(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION) ||
@@ -603,9 +598,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         } else {
             mSimState = IccCardConstants.State.UNKNOWN;
         }
-
         if (DEBUG) Log.d(TAG, "updateSimState: mSimState=" + mSimState);
-        updateSimIcon();
     }
 
     private boolean isCdma() {
@@ -870,16 +863,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         } else {
             return mServiceState != null && mServiceState.getRoaming();
         }
-    }
-
-    private final void updateSimIcon() {
-        Log.d(TAG,"In updateSimIcon simState= " + mSimState);
-        if (mSimState ==  IccCardConstants.State.ABSENT) {
-            mNoSimIconId = R.drawable.stat_sys_no_sim;
-        } else {
-            mNoSimIconId = 0;
-        }
-        refreshViews();
     }
 
     private final void updateDataIcon() {
@@ -1305,7 +1288,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mAirplaneIconId = TelephonyIcons.FLIGHT_MODE_ICON;
             mPhoneSignalIconId = mDataSignalIconId = mDataTypeIconId = mQSDataTypeIconId = 0;
             mQSPhoneSignalIconId = 0;
-            mNoSimIconId = 0;
 
             // combined values from connected wifi take precedence over airplane mode
             if (mWifiConnected) {
@@ -1378,7 +1360,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     + " mDataSignalIconId=0x" + Integer.toHexString(mDataSignalIconId)
                     + " mDataTypeIconId=0x" + Integer.toHexString(mDataTypeIconId)
                     + " mQSDataTypeIconId=0x" + Integer.toHexString(mQSDataTypeIconId)
-                    + " mNoSimIconId=0x" + Integer.toHexString(mNoSimIconId)
                     + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId)
                     + " mQSWifiIconId=0x" + Integer.toHexString(mQSWifiIconId)
                     + " mBluetoothTetherIconId=0x" + Integer.toHexString(mBluetoothTetherIconId));
@@ -1396,8 +1377,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
          || mLastDataTypeIconId             != mDataTypeIconId
          || mLastAirplaneMode               != mAirplaneMode
          || mLastLocale                     != mLocale
-         || mLastConnectedNetworkType       != mConnectedNetworkType
-         || mLastSimIconId                  != mNoSimIconId)
+         || mLastConnectedNetworkType       != mConnectedNetworkType)
         {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
@@ -1421,10 +1401,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // the data icon on phones
         if (mLastDataDirectionIconId != mDataDirectionIconId) {
             mLastDataDirectionIconId = mDataDirectionIconId;
-        }
-
-        if (mLastSimIconId != mNoSimIconId) {
-            mLastSimIconId = mNoSimIconId;
         }
 
         // the wifi icon on phones
@@ -1729,8 +1705,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             "Demo",
                             "Demo",
                             mDemoDataTypeIconId == TelephonyIcons.ROAMING_ICON,
-                            isTypeIconWide(mDemoDataTypeIconId),
-                            mNoSimIconId);
+                            isTypeIconWide(mDemoDataTypeIconId));
                 }
                 refreshViews();
             }
