@@ -62,6 +62,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 >
+                <com.android.keyguard.CarrierText
+                    android:id="@+id/carrier_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="end"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                    android:textSize="@dimen/status_bar_clock_size"
+                    android:textColor="#ffffff"
+                    android:singleLine="true" />
                 <com.android.systemui.statusbar.StatusBarIconView android:id="@+id/moreIcon"
                     android:layout_width="@dimen/status_bar_icon_size"
                     android:layout_height="match_parent"

@@ -351,11 +351,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // carrier/wifi label
     private TextView mCarrierLabel;
+    private TextView mKeyguardCarrierLabel;
     private boolean mCarrierLabelVisible = false;
     private int mCarrierLabelHeight;
     private int mStatusBarHeaderHeight;
 
     private boolean mShowCarrierInPanel = false;
+    private boolean mShowCarrierLabel;
 
     // position
     int[] mPositionTmp = new int[2];
@@ -433,6 +435,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BATTERY_SAVER_MODE_COLOR),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_SHOW_CARRIER),
+                    false, this, UserHandle.USER_ALL);
             //resolver.registerContentObserver(Settings.System.getUriFor(
             //        Settings.System.STATUS_BAR_BATTERY_STYLE), false, this);
             //resolver.registerContentObserver(Settings.System.getUriFor(
@@ -479,6 +484,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         Settings.System.NAVBAR_LEFT_IN_LANDSCAPE, 0) == 1;
                 mNavigationBarView.setLeftInLandscape(navLeftInLandscape);
             }
+
+            mShowCarrierLabel = Settings.System.getInt(resolver,
+                        Settings.System.STATUS_BAR_SHOW_CARRIER, 0) == 1;
+            mCarrierLabel.setVisibility(mShowCarrierLabel ? View.VISIBLE : View.GONE);
+            mKeyguardCarrierLabel.setVisibility(mShowCarrierLabel ? View.VISIBLE : View.GONE);
 /*
             boolean showInsidePercent = Settings.System.getIntForUser(resolver,
                     Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0, mCurrentUserId) == 1;
@@ -996,18 +1006,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNetworkController.addEmergencyLabelView(mHeader);
         }
 
-        mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
-        mShowCarrierInPanel = (mCarrierLabel != null);
+        mCarrierLabel = (TextView) mStatusBarWindow.findViewById(R.id.carrier_label);
+        mKeyguardCarrierLabel = (TextView) mKeyguardStatusBar.findViewById(R.id.keyguard_carrier_text);
+        mShowCarrierInPanel = (mCarrierLabel != null &&
+                            mKeyguardCarrierLabel != null && mShowCarrierLabel);
         if (DEBUG) Log.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
         if (mShowCarrierInPanel) {
-            mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.INVISIBLE);
+            mCarrierLabel.setVisibility(mShowCarrierLabel ? View.VISIBLE : View.GONE);
+            mKeyguardCarrierLabel.setVisibility(mShowCarrierLabel ? View.VISIBLE : View.GONE);
 
             // for mobile devices, we always show mobile connection info here (SPN/PLMN)
             // for other devices, we show whatever network is connected
             if (mNetworkController.hasMobileDataFeature()) {
                 mNetworkController.addMobileLabelView(mCarrierLabel);
+                mNetworkController.addMobileLabelView(mKeyguardCarrierLabel);
             } else {
                 mNetworkController.addCombinedLabelView(mCarrierLabel);
+                mNetworkController.addCombinedLabelView(mKeyguardCarrierLabel);
             }
 
             // set up the dynamic hide/show of the label

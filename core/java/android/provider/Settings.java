@@ -2997,10 +2997,10 @@ public final class Settings {
          public static final String VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
 
         /**
-         * Lock Screen carrier
+         * Status bar carrier label
          * @hide
          */
-        public static final String LOCK_SCREEN_SHOW_CARRIER = "lock_screen_show_carrier";
+        public static final String STATUS_BAR_SHOW_CARRIER = "status_bar_show_carrier";
 
         /** Whether to allow one finger quick settings expansion on the right side of the statusbar.
          *
