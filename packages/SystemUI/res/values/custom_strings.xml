@@ -48,4 +48,7 @@
     <!-- Announcement made when heads up changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_heads_up_changed_on">Heads up turned on.</string>
 
+    <!-- Heads up toast -->
+    <string name="heads_up_enabled">Heads up notifications enabled.</string>
+    <string name="heads_up_disabled">Heads up notifications disabled.</string>
 </resources>
