@@ -59,6 +59,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     protected void handleClick() {
         final boolean wasEnabled = (Boolean) mState.value;
         mController.setLocationEnabled(!wasEnabled);
+        qsCollapsePanel();
     }
 
     @Override
