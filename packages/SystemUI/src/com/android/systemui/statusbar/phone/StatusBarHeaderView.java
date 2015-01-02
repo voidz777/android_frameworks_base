@@ -611,6 +611,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         } else if (v == mHeadsUpButton) {
             startHeadsUpActivity();
         }
+        mQSPanel.vibrateTile(20);
     }
 
     private View.OnLongClickListener mLongClickListener =
@@ -619,6 +620,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         public boolean onLongClick(View v) {
             if (v == mHeadsUpButton) {
                 startHeadsUpLongClickActivity();
+                mQSPanel.vibrateTile(20);
             }
             return true;
         }
