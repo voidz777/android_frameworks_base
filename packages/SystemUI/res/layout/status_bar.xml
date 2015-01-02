@@ -63,7 +63,7 @@
                 android:layout_height="match_parent"
                 >
                 <com.android.keyguard.CarrierText
-                    android:id="@+id/carrier_label"
+                    android:id="@+id/statusbar_carrier_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"

@@ -31,6 +31,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.BatteryLevelTextView;
@@ -49,6 +50,9 @@ public class KeyguardStatusBarView extends RelativeLayout
     private boolean mKeyguardUserSwitcherShowing;
     private boolean mBatteryListening;
 
+    private int mShowCarrierLabel;
+    private TextView mCarrierLabel;
+
     private boolean mShowBatteryText;
 
     private View mSystemIconsSuperContainer;
@@ -65,6 +69,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private ContentObserver mObserver = new ContentObserver(new Handler()) {
         public void onChange(boolean selfChange, Uri uri) {
             loadShowBatteryTextSetting();
+            showStatusBarCarrier();
             updateVisibilities();
         }
     };
@@ -72,11 +77,17 @@ public class KeyguardStatusBarView extends RelativeLayout
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         loadShowBatteryTextSetting();
+        showStatusBarCarrier();
     }
 
     private void loadShowBatteryTextSetting() {
         mShowBatteryText = 2 == Settings.System.getInt(getContext().getContentResolver(),
                 Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0);
+    }
+
+    private void showStatusBarCarrier() {
+        mShowCarrierLabel = Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.STATUS_BAR_SHOW_CARRIER, 1);
     }
 
     @Override
@@ -85,6 +96,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mSystemIconsSuperContainer = findViewById(R.id.system_icons_super_container);
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
+        mCarrierLabel = (TextView) findViewById(R.id.keyguard_carrier_text);
         mBatteryLevel = (BatteryLevelTextView) findViewById(R.id.battery_level_text);
         loadDimens();
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
@@ -107,8 +119,17 @@ public class KeyguardStatusBarView extends RelativeLayout
         } else if (mMultiUserSwitch.getParent() == this && mKeyguardUserSwitcherShowing) {
             removeView(mMultiUserSwitch);
         }
+
         mBatteryLevel.setShowPercent(
                 (mBatteryCharging || mShowBatteryText) ? true : false);
+
+        if (mShowCarrierLabel == 1) {
+            mCarrierLabel.setVisibility(View.VISIBLE);
+        } else if (mShowCarrierLabel == 3) {
+            mCarrierLabel.setVisibility(View.VISIBLE);
+        } else {
+            mCarrierLabel.setVisibility(View.GONE);
+        }
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -250,6 +271,8 @@ public class KeyguardStatusBarView extends RelativeLayout
         super.onAttachedToWindow();
         getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
                 "status_bar_show_battery_percent"), false, mObserver);
+        getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                "status_bar_show_carrier"), false, mObserver);
     }
 
     @Override
