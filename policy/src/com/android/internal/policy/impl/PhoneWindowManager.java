@@ -1461,7 +1461,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mBackKillTimeout = Settings.System.getIntForUser(resolver,
                     Settings.System.LONG_PRESS_KILL_DELAY, 1000, UserHandle.USER_CURRENT);
             mVolBtnMusicControls = (Settings.System.getIntForUser(resolver,
-                    Settings.System.VOLBTN_MUSIC_CONTROLS, 1, UserHandle.USER_CURRENT) == 1);
+                    Settings.System.VOLBTN_MUSIC_CONTROLS, 0, UserHandle.USER_CURRENT) == 1);
 
             // Configure wake gesture.
             boolean wakeGestureEnabledSetting = Settings.Secure.getIntForUser(resolver,
@@ -1473,7 +1473,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             final boolean useEdgeService = Settings.System.getIntForUser(resolver,
-                    Settings.System.USE_EDGE_SERVICE_FOR_GESTURES, 1, UserHandle.USER_CURRENT) == 1;
+                    Settings.System.USE_EDGE_SERVICE_FOR_GESTURES, 0, UserHandle.USER_CURRENT) == 1;
             if (useEdgeService ^ mUsingEdgeGestureServiceForGestures && mSystemReady) {
                 if (!mUsingEdgeGestureServiceForGestures && useEdgeService) {
                     mUsingEdgeGestureServiceForGestures = true;
