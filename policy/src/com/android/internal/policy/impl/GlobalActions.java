@@ -38,6 +38,7 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
+import android.Manifest;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -107,6 +108,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
     private static final String GLOBAL_ACTION_KEY_LOCKDOWN = "lockdown";
     private static final String GLOBAL_ACTION_KEY_PROFILE = "profile";
+    private static final String GLOBAL_ACTION_KEY_SCREEN_RECORD = "screenrecord";
 
     private final Context mContext;
     private final WindowManagerFuncs mWindowManagerFuncs;
@@ -268,6 +270,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         onAirplaneModeChanged();
 
         mItems = new ArrayList<Action>();
+
         String[] defaultActions = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_globalActionsList);
 
@@ -325,6 +328,30 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                             }
 
                         });
+            } else if (GLOBAL_ACTION_KEY_SCREEN_RECORD.equals(actionKey)) {
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.POWER_MENU_SCREENRECORD_ENABLED, 0) != 0) {
+                    mItems.add(
+                        new SinglePressAction(com.android.internal.R.drawable.ic_lock_screen_record,
+                                R.string.global_action_screen_record) {
+
+                            public void onPress() {
+                                toggleScreenRecord();
+                            }
+
+                            public boolean onLongPress() {
+                                return false;
+                            }
+
+                            public boolean showDuringKeyguard() {
+                                return true;
+                            }
+
+                            public boolean showBeforeProvisioning() {
+                                return true;
+                            }
+                        });
+                }
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -651,6 +678,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 }
             }
         }
+    }
+
+    private void toggleScreenRecord() {
+        final Intent recordIntent = new Intent("org.chameleonos.action.NOTIFY_RECORD_SERVICE");
+        mContext.sendBroadcast(recordIntent, Manifest.permission.RECORD_SCREEN);
     }
 
     private void prepareDialog() {
