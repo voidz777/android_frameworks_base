@@ -3047,6 +3047,12 @@ public final class Settings {
          */
         public static final String QUICK_SETTINGS_COLLAPSE_PANEL = "quick_settings_collapse_panel";
 
+        /** Whether to show the brightness slider in quick settings panel.
+         *
+         * @hide
+         */
+        public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
+
         /**
          * This preference enables showing the power menu on LockScreen.
          * @hide
