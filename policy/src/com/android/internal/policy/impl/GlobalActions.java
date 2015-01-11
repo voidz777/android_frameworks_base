@@ -305,7 +305,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
                 mItems.add(getLockdownAction());
             } else if (GLOBAL_ACTION_KEY_PROFILE.equals(actionKey)) {
-                mItems.add(
+                // next: profile
+                // only shown if both system profiles is enabled, enabled by default
+                boolean showProfiles =
+                    Settings.System.getIntForUser(mContext.getContentResolver(),
+                            Settings.System.SYSTEM_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
+                if (showProfiles) {
+                    mItems.add(
                         new ProfileChooseAction() {
                             public void onPress() {
                                 createProfileDialog();
@@ -328,6 +334,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                             }
 
                         });
+                }
             } else if (GLOBAL_ACTION_KEY_SCREEN_RECORD.equals(actionKey)) {
                 if (Settings.System.getInt(mContext.getContentResolver(),
                         Settings.System.POWER_MENU_SCREENRECORD_ENABLED, 0) != 0) {
