@@ -49,6 +49,19 @@
     <string name="permgrouplab_security">Sécurité</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_security">Permissions relatives à l\'information de sécurité de l\'appareil.</string>
+	
+     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessThemeService">accès au service de thème</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessThemeService">Permet à une application d\'accéder au service de thème. Il ne doit jamais être nécessaire pour les applications normales.</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_readThemes">lire les informations sur le thème</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readThemesDesc">Permet à l\'application de lire vos thèmes et de déterminer quel thème vous avez appliqué.</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_writeThemes">Modifier votre thème</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_writeThemesDesc">Permet à l\'application d\'installer de nouveaux thèmes et de modifier le thème que vous avez appliqué.</string>
 
     <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readPhoneBlacklist">Lire la liste noire téléphonique</string>
@@ -206,4 +219,17 @@
     <!-- Text of the checkbox for the permission confirmation dialog to remember the user's choice. [CHAR LIMIT=40] -->
     <string name="permission_remember_choice">Se souvenir</string>
     <string name="permission">Permission</string>
+	
+    <!-- Theme installation error notification -->
+    <string name="theme_install_error_title">Impossible d\'installer le thème</string>
+    <string name="theme_install_error_message">%s échec à l\'installation</string>
+	
+    <!-- [CHAR LIMIT=NONE] Message shown in dialog on first boot after clean install for each .apk that is optimized. -->
+    <string name="android_installing_apk">Installation de l'application
+        <xliff:g id="number" example="123">%1$d</xliff:g> de
+        <xliff:g id="number" example="123">%2$d</xliff:g>.</string>
+
+    <!-- [CHAR LIMIT=40] Title of dialog that is shown when performing a system install. -->
+    <string name="android_installing_title">Android s\'installe\u2026</string>
 </resources>
+
