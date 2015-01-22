@@ -33,6 +33,7 @@ public class QSConstants {
     public static final String TILE_HOTSPOT = "hotspot";
     public static final String TILE_NOTIFICATIONS = "notifications";
     public static final String TILE_PROFILES = "profiles";
+    public static final String TILE_PERFORMANCE = "performance";
     public static final String TILE_ADB_NETWORK = "adb_network";
     public static final String TILE_NFC = "nfc";
     public static final String TILE_COMPASS = "compass";
@@ -71,6 +72,7 @@ public class QSConstants {
         TILES_AVAILABLE.add(TILE_HOTSPOT);
         TILES_AVAILABLE.add(TILE_NOTIFICATIONS);
         TILES_AVAILABLE.add(TILE_PROFILES);
+        TILES_AVAILABLE.add(TILE_PERFORMANCE);
         TILES_AVAILABLE.add(TILE_ADB_NETWORK);
         TILES_AVAILABLE.add(TILE_NFC);
         TILES_AVAILABLE.add(TILE_COMPASS);
