@@ -42,6 +42,7 @@ import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NotificationsTile;
+import com.android.systemui.qs.tiles.ProfilesTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -281,6 +282,8 @@ public class QSTileHost implements QSTile.Host {
                 return new HotspotTile(this);
             case QSConstants.TILE_NOTIFICATIONS:
                 return new NotificationsTile(this);
+            case QSConstants.TILE_PROFILES:
+                return new ProfilesTile(this);
             default:
                 throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
         }
