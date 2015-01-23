@@ -77,7 +77,7 @@
                 <com.android.keyguard.CarrierText
                     android:id="@+id/statusbar_carrier_text"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="fill_parent"
                     android:ellipsize="end"
                     android:textAppearance="@style/TextAppearance.StatusBar.Clock"
                     android:textSize="@dimen/status_bar_clock_size"
