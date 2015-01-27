@@ -32,10 +32,6 @@ public class QSConstants {
     public static final String TILE_CAST = "cast";
     public static final String TILE_HOTSPOT = "hotspot";
     public static final String TILE_NOTIFICATIONS = "notifications";
-    public static final String TILE_DATA = "data";
-    public static final String TILE_ROAMING = "roaming";
-    public static final String TILE_DDS = "dds";
-    public static final String TILE_APN = "apn";
     public static final String TILE_PROFILES = "profiles";
     public static final String TILE_ADB_NETWORK = "adb_network";
     public static final String TILE_NFC = "nfc";
@@ -64,10 +60,6 @@ public class QSConstants {
         TILES_AVAILABLE.add(TILE_INVERSION);
         TILES_AVAILABLE.add(TILE_HOTSPOT);
         TILES_AVAILABLE.add(TILE_NOTIFICATIONS);
-        TILES_AVAILABLE.add(TILE_DATA);
-        TILES_AVAILABLE.add(TILE_ROAMING);
-        TILES_AVAILABLE.add(TILE_DDS);
-        TILES_AVAILABLE.add(TILE_APN);
         TILES_AVAILABLE.add(TILE_PROFILES);
         TILES_AVAILABLE.add(TILE_ADB_NETWORK);
         TILES_AVAILABLE.add(TILE_NFC);
