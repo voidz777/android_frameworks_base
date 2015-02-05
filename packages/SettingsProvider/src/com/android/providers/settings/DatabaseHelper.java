@@ -75,7 +75,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 118;
+    private static final int DATABASE_VERSION = 119;
 
     private Context mContext;
     private int mUserHandle;
@@ -1913,6 +1913,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 118;
+        }
+
+        if (upgradeVersion < 119) {
+            // only the owner has access to global table, so we need to check that here
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                String[] globalToSecure = new String[] { Settings.Secure.POWER_MENU_ACTIONS };
+
+                moveSettingsToNewTable(db, TABLE_GLOBAL, TABLE_SECURE, globalToSecure, true);
+            }
+            upgradeVersion = 119;
         }
 
         // *** Remember to update DATABASE_VERSION above!

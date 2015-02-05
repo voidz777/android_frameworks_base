@@ -1401,13 +1401,15 @@ public final class Settings {
                 int userHandle) {
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
-                        + " to android.provider.Settings.Secure, value is unchanged.");
-                return false;
+                        + " to android.provider.Settings.Secure.");
+
+                return Secure.putStringForUser(resolver, name, value, userHandle);
             }
             if (MOVED_TO_GLOBAL.contains(name) || MOVED_TO_SECURE_THEN_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
-                        + " to android.provider.Settings.Global, value is unchanged.");
-                return false;
+                        + " to android.provider.Settings.Global.");
+
+                return Global.putStringForUser(resolver, name, value, userHandle);
             }
             return sNameValueCache.putStringForUser(resolver, name, value, userHandle);
         }
@@ -3135,14 +3137,14 @@ public final class Settings {
          */
         public static final String LONG_PRESS_KILL_DELAY = "long_press_kill_delay";
 
-         /**
-          * Volume keys control cursor in text fields (default is 0)
-          * 0 - Disabled
-          * 1 - Volume up/down moves cursor left/right
-          * 2 - Volume up/down moves cursor right/left
-          * @hide
-          */
-         public static final String VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
+        /**
+         * Volume keys control cursor in text fields (default is 0)
+         * 0 - Disabled
+         * 1 - Volume up/down moves cursor left/right
+         * 2 - Volume up/down moves cursor right/left
+         * @hide
+         */
+        public static final String VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
 
         /**
          * Status bar carrier label
@@ -5798,6 +5800,12 @@ public final class Settings {
          */
         public static final String SEARCH_PANEL_ENABLED = "search_panel_enabled";
 
+        /*
+         * String to contain power menu actions
+         * @hide
+         */
+        public static final String POWER_MENU_ACTIONS = "power_menu_actions";
+
         /**
          * This are the settings to be backed up.
          *
@@ -6240,9 +6248,11 @@ public final class Settings {
 
         /**
          * String to contain power menu actions
+         * @deprecated Use {@link android.provider.Settings.Secure#POWER_MENU_ACTIONS} instead
          * @hide
          */
-        public static final String POWER_MENU_ACTIONS = "power_menu_actions";
+        @Deprecated
+        public static final String POWER_MENU_ACTIONS = Secure.POWER_MENU_ACTIONS;
 
         /**
          * Whether Views are allowed to save their attribute data.
@@ -7647,6 +7657,7 @@ public final class Settings {
         static {
             MOVED_TO_SECURE = new HashSet<String>(1);
             MOVED_TO_SECURE.add(Settings.Global.INSTALL_NON_MARKET_APPS);
+            MOVED_TO_SECURE.add(Settings.Secure.POWER_MENU_ACTIONS);
         }
 
         /**
@@ -7743,6 +7754,12 @@ public final class Settings {
          * @return the corresponding content URI, or null if not present
          */
         public static Uri getUriFor(String name) {
+            if (MOVED_TO_SECURE.contains(name)) {
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
+                        + " to android.provider.Settings.Secure, returning Secure URI.");
+                return Secure.getUriFor(Secure.CONTENT_URI, name);
+            }
+
             return getUriFor(CONTENT_URI, name);
         }
 
