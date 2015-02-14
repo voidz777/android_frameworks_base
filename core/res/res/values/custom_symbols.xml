@@ -102,4 +102,7 @@
   <java-symbol type="string" name="theme_reset_notification_title" />
   <java-symbol type="string" name="theme_reset_notification_body" />
 
+  <!-- USB charge only notification -->
+  <java-symbol type="string" name="usb_charging_notification_title" />
+
 </resources>
