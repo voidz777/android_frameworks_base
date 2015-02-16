@@ -3620,6 +3620,12 @@ public final class Settings {
         public static final String DOZE_AUTO_BRIGHTNESS = "doze_auto_brightness";
 
         /**
+         * Timeout for volume panel
+         * @hide
+         */
+        public static final String VOLUME_PANEL_TIMEOUT = "volume_panel_timeout";
+
+        /**
          * Locale for secondary overlay on dialer for t9 search input
          * @hide
          */
