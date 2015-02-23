@@ -2130,7 +2130,6 @@ public final class Settings {
 
         /**
          * Whether to show the IME switcher in the status bar
-         *
          * @hide
          */
         public static final String STATUS_BAR_IME_SWITCHER = "status_bar_ime_switcher";
@@ -2143,25 +2142,30 @@ public final class Settings {
         public static final String STATUS_BAR_TICKER_ENABLED = "status_bar_ticker_enabled";
 
         /**
-         * Deprecated Use {@link android.provider.Settings.Secure.QS_TILES}
+         * Whether to show the brightness slider in quick settings panel.
+         * @deprecated Use {@link android.provider.Settings.Secure#QS_SHOW_BRIGHTNESS_SLIDER}
+         * instead
          * @hide
          */
         @Deprecated
-        public static final String QS_TILES = "sysui_qs_tiles";
+        public static final String QS_SHOW_BRIGHTNESS_SLIDER = Secure.QS_SHOW_BRIGHTNESS_SLIDER;
 
         /**
-         * Deprecated Use {@link android.provider.Settings.Secure.QS_USE_MAIN_TILES}
+         * List of QS tile names
+         * @deprecated Use {@link android.provider.Settings.Secure#QS_TILES} instead
          * @hide
          */
         @Deprecated
-        public static final String QS_USE_MAIN_TILES = "sysui_qs_main_tiles";
+        public static final String QS_TILES = Secure.QS_TILES;
 
-        /** Whether to show the brightness slider in quick settings panel.
-         *
+        /**
+         * Use "main" tiles on the first row of the quick settings panel
+         * 0 = no, 1 = yes
+         * @deprecated Use {@link android.provider.Settings.Secure#QS_USE_MAIN_TILES} instead
          * @hide
          */
         @Deprecated
-        public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
+        public static final String QS_USE_MAIN_TILES = Secure.QS_USE_MAIN_TILES;
 
         /**
          * Control whether the process CPU usage meter should be shown.
@@ -3187,19 +3191,21 @@ public final class Settings {
          */
         public static final String NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD = "network_traffic_autohide_threshold";
 
-        /** Whether to allow one finger quick settings expansion on the right side of the statusbar.
-         *
+        /**
+         * Whether to allow one finger quick settings expansion on the right side of the statusbar.
          * @hide
          */
         public static final String STATUS_BAR_QUICK_QS_PULLDOWN = "status_bar_quick_qs_pulldown";
 
-        /** Whether to vibrate when quick settings tile is pressed.
+        /**
+         * Whether to vibrate when quick settings tile is pressed.
          *
          * @hide
          */
         public static final String QUICK_SETTINGS_TILES_VIBRATE = "quick_settings_vibrate";
 
-        /** Whether to collapse panel when quick settings tile is pressed.
+        /**
+         * Whether to collapse panel when quick settings tile is pressed.
          *
          * @hide
          */
@@ -3299,7 +3305,6 @@ public final class Settings {
 
         /**
          * Whether navigation bar is placed on the left side in landscape mode
-         *
          * @hide
          */
         public static final String NAVBAR_LEFT_IN_LANDSCAPE = "navigation_bar_left";
@@ -5820,8 +5825,8 @@ public final class Settings {
         public static final String STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD
                 = "status_bar_locked_on_secure_keyguard";
 
-        /** Whether to show the brightness slider in quick settings panel.
-         *
+        /**
+         * Whether to show the brightness slider in quick settings panel.
          * @hide
          */
         public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
