@@ -66,4 +66,7 @@
     <!-- The list of components which should be forced to be enabled. -->
     <string-array name="config_forceEnabledComponents" translatable="false">
     </string-array>
+
+    <!-- Boolean to enable the advanced settings switch -->
+    <bool name="config_advancedSettingsMode">true</bool>
 </resources>
