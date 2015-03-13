@@ -39,6 +39,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.SuController;
+import com.android.systemui.statusbar.policy.HotspotController;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
@@ -53,6 +54,7 @@ public class PhoneStatusBarPolicy {
 
     private static final String SLOT_SYNC_ACTIVE = "sync_active";
     private static final String SLOT_CAST = "cast";
+    private static final String SLOT_HOTSPOT = "hotspot";
     private static final String SLOT_BLUETOOTH = "bluetooth";
     private static final String SLOT_TTY = "tty";
     private static final String SLOT_ZEN = "zen";
@@ -65,6 +67,7 @@ public class PhoneStatusBarPolicy {
     private final StatusBarManager mService;
     private final Handler mHandler = new Handler();
     private final CastController mCast;
+    private final HotspotController mHotspot;
     private final SuController mSuController;
     private boolean mAlarmIconVisible;
     private boolean mSuIconVisible;
@@ -95,7 +98,8 @@ public class PhoneStatusBarPolicy {
                     action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
                 updateBluetooth();
             }
-            else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
+            else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
+                    action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
                 updateVolumeZen();
             }
             else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
@@ -110,9 +114,11 @@ public class PhoneStatusBarPolicy {
         }
     };
 
-    public PhoneStatusBarPolicy(Context context, CastController cast, SuController su) {
+    public PhoneStatusBarPolicy(Context context, CastController cast,
+                HotspotController hotspot, SuController su) {
         mContext = context;
         mCast = cast;
+        mHotspot = hotspot;
         mSuController = su;
         mService = (StatusBarManager)context.getSystemService(Context.STATUS_BAR_SERVICE);
 
@@ -121,6 +127,7 @@ public class PhoneStatusBarPolicy {
         filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
@@ -161,6 +168,11 @@ public class PhoneStatusBarPolicy {
         mService.setIcon(SLOT_CAST, R.drawable.stat_sys_cast, 0, null);
         mService.setIconVisibility(SLOT_CAST, false);
         mCast.addCallback(mCastCallback);
+
+        // hotspot
+        mService.setIcon(SLOT_HOTSPOT, R.drawable.stat_sys_hotspot, 0, null);
+        mService.setIconVisibility(SLOT_HOTSPOT, mHotspot.isHotspotEnabled());
+        mHotspot.addCallback(mHotspotCallback);
 
         // su
         mService.setIcon(SLOT_SU, R.drawable.stat_sys_su, 0, null);
@@ -260,7 +272,7 @@ public class PhoneStatusBarPolicy {
         }
 
         if (mZen != Global.ZEN_MODE_NO_INTERRUPTIONS &&
-                audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
+                audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_vibrate;
             volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
@@ -338,6 +350,13 @@ public class PhoneStatusBarPolicy {
         }
         mService.setIconVisibility(SLOT_CAST, isCasting);
     }
+
+    private final HotspotController.Callback mHotspotCallback = new HotspotController.Callback() {
+        @Override
+        public void onHotspotChanged(boolean enabled) {
+            mService.setIconVisibility(SLOT_HOTSPOT, enabled);
+        }
+    };
 
     private void updateSu() {
         mService.setIconVisibility(SLOT_SU, mSuIconVisible && mSuController.hasActiveSessions());

@@ -44,14 +44,6 @@ oneway interface IFullBackupRestoreObserver {
     void onEndBackup();
 
     /**
-     * Notification: the full backup operation has ended with result.
-     *
-     * <p>To ensure backwards-compatibility, onEndBackup() and onEndBackupWithResult()
-     * are both called for the same backup operation.
-     */
-    void onEndBackupWithResult(int result);
-
-    /**
      * Notification: a restore-from-full-backup operation has begun.
      */
     void onStartRestore();
@@ -69,14 +61,6 @@ oneway interface IFullBackupRestoreObserver {
      * Notification: the restore-from-full-backup operation has ended.
      */
     void onEndRestore();
-
-    /**
-     * Notification: the restore-from-full-backup operation has ended with result.
-     *
-     * <p>To ensure backwards-compatibility, onEndBackup() and onEndBackupWithResult()
-     * are both called for the same backup operation.
-     */
-    void onEndRestoreWithResult(int result);
 
     /**
      * The user's window of opportunity for confirming the operation has timed out.

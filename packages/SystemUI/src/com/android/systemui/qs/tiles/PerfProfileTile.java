@@ -36,14 +36,15 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
 
     private final PowerManager mPm;
     private boolean mListening;
+    private AnimatedVectorDrawable avd;
 
     private PerformanceProfileObserver mObserver;
 
     private Runnable mStartTileAnimation = new Runnable() {
         @Override
         public void run() {
-            if (getState().icon instanceof AnimatedVectorDrawable) {
-                ((AnimatedVectorDrawable) getState().icon).start();
+            if (avd instanceof AnimatedVectorDrawable) {
+                ((AnimatedVectorDrawable) avd).start();
             }
         }
     };
@@ -82,7 +83,7 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
         state.visible = true;
         state.profile = arg == null ? getCurrentProfileIndex() : (Integer) arg;
         state.label = mEntries[state.profile];
-        state.icon = mContext.getDrawable(mEntryIconRes[state.profile]);
+        state.icon = ResourceIcon.get(mEntryIconRes[state.profile]);
         mUiHandler.post(mStartTileAnimation);
     }
 

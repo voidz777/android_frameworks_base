@@ -76,8 +76,10 @@ public class QSPanel extends ViewGroup {
     private int mDualTileUnderlap;
     private int mBrightnessPaddingTop;
     private int mTranslationTop;
+    private int mGridHeight;
     private boolean mExpanded;
     private boolean mListening;
+    private boolean mClosingDetail;
 
     private boolean mBrightnessSliderEnabled;
     private boolean mUseFourColumns;
@@ -280,7 +282,7 @@ public class QSPanel extends ViewGroup {
         }
     }
 
-    private void refreshAllTiles() {
+    public void refreshAllTiles() {
         mUseMainTiles = Settings.Secure.getIntForUser(getContext().getContentResolver(),
                 Settings.Secure.QS_USE_MAIN_TILES, 1, UserHandle.USER_CURRENT) == 1;
         for (int i = 0; i < mRecords.size(); i++) {
@@ -405,6 +407,14 @@ public class QSPanel extends ViewGroup {
         showDetail(false, mDetailRecord);
     }
 
+    public boolean isClosingDetail() {
+        return mClosingDetail;
+    }
+
+    public int getGridHeight() {
+        return mGridHeight;
+    }
+
     private void handleShowDetail(Record r, boolean show) {
         if (r instanceof TileRecord) {
             handleShowDetailTile((TileRecord) r, show);
@@ -450,6 +460,7 @@ public class QSPanel extends ViewGroup {
             setDetailRecord(r);
             listener = mHideGridContentWhenDone;
         } else {
+            mClosingDetail = true;
             setGridContentVisibility(true);
             listener = mTeardownDetailWhenDone;
             fireScanStateChanged(false);
@@ -524,6 +535,7 @@ public class QSPanel extends ViewGroup {
                 mDetail.measure(exactly(width), exactly(detailMinHeight));
             }
         }
+        mGridHeight = h;
         setMeasuredDimension(width, Math.max(h, mDetail.getMeasuredHeight()));
     }
 
@@ -646,6 +658,7 @@ public class QSPanel extends ViewGroup {
         public void onAnimationEnd(Animator animation) {
             mDetailContent.removeAllViews();
             setDetailRecord(null);
+            mClosingDetail = false;
             if (mDetailCallback != null) {
                 mDetailCallback.onDetailChanged(false);
             }
@@ -661,7 +674,10 @@ public class QSPanel extends ViewGroup {
 
         @Override
         public void onAnimationEnd(Animator animation) {
-            setGridContentVisibility(false);
+            // Only hide content if still in detail state.
+            if (mDetailRecord != null) {
+                setGridContentVisibility(false);
+            }
         }
     };
 

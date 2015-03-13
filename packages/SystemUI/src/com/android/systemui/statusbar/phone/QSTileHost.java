@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Process;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -58,7 +59,7 @@ import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.VisualizerTile;
 import com.android.systemui.qs.tiles.ScreenOffTile;
 import com.android.systemui.qs.tiles.ScreenshotTile;
-import com.android.systemui.qs.tiles.ScreenTimeoutTile;
+//import com.android.systemui.qs.tiles.ScreenTimeoutTile;
 import com.android.systemui.qs.tiles.SyncTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -126,7 +127,8 @@ public class QSTileHost implements QSTile.Host {
         mKeyguard = keyguard;
         mSecurity = security;
 
-        final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName());
+        final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
+                Process.THREAD_PRIORITY_BACKGROUND);
         ht.start();
         mLooper = ht.getLooper();
 
@@ -138,6 +140,7 @@ public class QSTileHost implements QSTile.Host {
                     tile.userSwitch(newUserId);
                 }
                 mSecurity.onUserSwitched(newUserId);
+                mNetwork.onUserSwitched(newUserId);
                 mObserver.register();
             }
         };
@@ -305,8 +308,8 @@ public class QSTileHost implements QSTile.Host {
                 return new LteTile(this);
             case QSConstants.TILE_VISUALIZER:
                 return new VisualizerTile(this);
-            case QSConstants.TILE_SCREEN_TIMEOUT:
-                return new ScreenTimeoutTile(this);
+            /**case QSConstants.TILE_SCREEN_TIMEOUT:
+                return new ScreenTimeoutTile(this);**/
             case QSConstants.TILE_SCREENSHOT:
                 return new ScreenshotTile(this);
             case QSConstants.TILE_SYNC:

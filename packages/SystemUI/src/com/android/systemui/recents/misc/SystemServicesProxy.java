@@ -21,6 +21,7 @@ import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.ITaskStackListener;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
@@ -58,6 +59,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import com.android.systemui.R;
+import com.android.systemui.recents.AlternateRecentsComponent;
 import com.android.systemui.recents.Constants;
 
 import java.io.IOException;
@@ -65,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -173,17 +176,38 @@ public class SystemServicesProxy {
             return tasks;
         }
 
-        // Remove home/recents
+        // Remove home/recents/excluded tasks
         int minNumTasksToQuery = 10;
         int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
         List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
                 ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                ActivityManager.RECENT_INCLUDE_PROFILES, userId);
+                ActivityManager.RECENT_INCLUDE_PROFILES |
+                ActivityManager.RECENT_WITH_EXCLUDED, userId);
 
         // Break early if we can't get a valid set of tasks
         if (tasks == null) {
             return new ArrayList<ActivityManager.RecentTaskInfo>();
+        }
+
+        boolean isFirstValidTask = true;
+        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
+        while (iter.hasNext()) {
+            ActivityManager.RecentTaskInfo t = iter.next();
+
+            // NOTE: The order of these checks happens in the expected order of the traversal of the
+            // tasks
+
+            // Check the first non-recents task, include this task even if it is marked as excluded
+            // from recents if we are currently in the app.  In other words, only remove excluded
+            // tasks if it is not the first active task.
+            boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                    == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+            if (isExcluded && (isTopTaskHome || !isFirstValidTask)) {
+                iter.remove();
+                continue;
+            }
+            isFirstValidTask = false;
         }
 
         return tasks.subList(0, Math.min(tasks.size(), numLatestTasks));
@@ -193,6 +217,37 @@ public class SystemServicesProxy {
     public List<ActivityManager.RunningTaskInfo> getRunningTasks(int numTasks) {
         if (mAm == null) return null;
         return mAm.getRunningTasks(numTasks);
+    }
+
+    /** Returns the top task. */
+    public ActivityManager.RunningTaskInfo getTopMostTask() {
+        List<ActivityManager.RunningTaskInfo> tasks = getRunningTasks(1);
+        if (!tasks.isEmpty()) {
+            return tasks.get(0);
+        }
+        return null;
+    }
+
+    /** Returns whether the recents is currently running */
+    public boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask,
+            AtomicBoolean isHomeTopMost) {
+        if (topTask != null) {
+            ComponentName topActivity = topTask.topActivity;
+
+            // Check if the front most activity is recents
+            if (topActivity.getPackageName().equals(AlternateRecentsComponent.sRecentsPackage) &&
+                    topActivity.getClassName().equals(AlternateRecentsComponent.sRecentsActivity)) {
+                if (isHomeTopMost != null) {
+                    isHomeTopMost.set(false);
+                }
+                return true;
+            }
+
+            if (isHomeTopMost != null) {
+                isHomeTopMost.set(isInHomeStack(topTask.id));
+            }
+        }
+        return false;
     }
 
     /** Returns whether the specified task is in the home stack */
@@ -221,6 +276,7 @@ public class SystemServicesProxy {
 
         Bitmap thumbnail = SystemServicesProxy.getThumbnail(mAm, taskId);
         if (thumbnail != null) {
+            thumbnail.setHasAlpha(false);
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
             // left pixel, then assume the whole thumbnail is transparent. Generally, proper
             // screenshots are always composed onto a bitmap that has no alpha.
@@ -270,42 +326,18 @@ public class SystemServicesProxy {
         }
     }
 
-    /** Removes the task and kills the process */
-    public void removeTask(int taskId, boolean isDocument) {
+    /** Removes the task */
+    public void removeTask(int taskId) {
         if (mAm == null) return;
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
 
-        // Remove the task, and only kill the process if it is not a document
-        mAm.removeTask(taskId, isDocument ? 0 : ActivityManager.REMOVE_TASK_KILL_PROCESS);
-    }
-
-    /** Removes all the user task and kills its processes **/
-    public void removeAllUserTask(int userId) {
-        // Exclude home/recents tasks
-        List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(
-                ActivityManager.getMaxRecentTasksStatic(),
-                ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                ActivityManager.RECENT_INCLUDE_PROFILES |
-                ActivityManager.RECENT_WITH_EXCLUDED, userId);
-        if (tasks == null) {
-            return;
-        }
-        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
-        while (iter.hasNext()) {
-            ActivityManager.RecentTaskInfo t = iter.next();
-            if (t.persistentId > 0) {
-                // Only if is running
-                boolean isDocument = Utilities.isDocument(t.baseIntent);
-                mAm.removeTask(t.persistentId,
-                        isDocument ? 0 : ActivityManager.REMOVE_TASK_KILL_PROCESS);
-            }
-        }
+        // Remove the task.
+        mAm.removeTask(taskId);
     }
 
     /**
      * Returns the activity info for a given component name.
-     * 
+     *
      * @param cn The component name of the activity.
      * @param userId The userId of the user that this is for.
      */
@@ -395,6 +427,15 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns whether the foreground user is the owner.
+     */
+    public boolean isForegroundUserOwner() {
+        if (mAm == null) return false;
+
+        return mAm.getCurrentUser() == UserHandle.USER_OWNER;
+    }
+
+    /**
      * Resolves and returns the first Recents widget from the same package as the global
      * assist activity.
      */
@@ -432,6 +473,7 @@ public class SystemServicesProxy {
         opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
                 AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
         if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, searchWidgetInfo.provider, opts)) {
+            host.deleteAppWidgetId(searchWidgetId);
             return null;
         }
         return new Pair<Integer, AppWidgetProviderInfo>(searchWidgetId, searchWidgetInfo);
@@ -495,17 +537,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Locks the current task.
-     */
-    public void lockCurrentTask() {
-        if (mIam == null) return;
-
-        try {
-            mIam.startLockTaskModeOnCurrent();
-        } catch (RemoteException e) {}
-    }
-
-    /**
      * Takes a screenshot of the current surface.
      */
     public Bitmap takeScreenshot() {
@@ -534,5 +565,27 @@ public class SystemServicesProxy {
             }
         }
         return false;
+    }
+
+    /** Starts an in-place animation on the front most application windows. */
+    public void startInPlaceAnimationOnFrontMostApplication(ActivityOptions opts) {
+        if (mIam == null) return;
+
+        try {
+            mIam.startInPlaceAnimationOnFrontMostApplication(opts);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Registers a task stack listener with the system. */
+    public void registerTaskStackListener(ITaskStackListener listener) {
+        if (mIam == null) return;
+
+        try {
+            mIam.registerTaskStackListener(listener);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -754,6 +754,14 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
+    public boolean isUpgrade() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public void installPackage(Uri packageURI, PackageInstallObserver observer,
             int flags, String installerPackageName) {
         throw new UnsupportedOperationException();
@@ -827,6 +835,13 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public int processThemeResources(String themePkgName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    public Drawable loadUnbadgedItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
         throw new UnsupportedOperationException();
     }
 }

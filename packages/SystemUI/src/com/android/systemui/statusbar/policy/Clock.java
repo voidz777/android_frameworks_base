@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -24,8 +25,8 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.provider.Settings;
+import android.os.UserHandle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -132,7 +133,8 @@ public class Clock implements DemoMode {
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
 
-            mContext.registerReceiver(mIntentReceiver, filter, null, new Handler());
+            mContext.registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter,
+                    null, new Handler());
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -171,8 +173,9 @@ public class Clock implements DemoMode {
     };
 
     private final CharSequence getSmallTime() {
-        boolean is24 = DateFormat.is24HourFormat(mContext);
-        LocaleData d = LocaleData.get(mContext.getResources().getConfiguration().locale);
+        Context context = mContext;
+        boolean is24 = DateFormat.is24HourFormat(context, ActivityManager.getCurrentUser());
+        LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
 
         final char MAGIC1 = '\uEF00';
         final char MAGIC2 = '\uEF01';
