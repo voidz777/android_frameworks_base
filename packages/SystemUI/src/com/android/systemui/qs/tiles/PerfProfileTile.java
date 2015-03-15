@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -36,18 +35,8 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
 
     private final PowerManager mPm;
     private boolean mListening;
-    private AnimatedVectorDrawable avd;
 
     private PerformanceProfileObserver mObserver;
-
-    private Runnable mStartTileAnimation = new Runnable() {
-        @Override
-        public void run() {
-            if (avd instanceof AnimatedVectorDrawable) {
-                ((AnimatedVectorDrawable) avd).start();
-            }
-        }
-    };
 
     public PerfProfileTile(Host host) {
         super(host);
@@ -64,7 +53,6 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
 
         mPerfProfileDefaultEntry = mPm.getDefaultPowerProfile();
         mPerfProfileValues = res.getStringArray(com.android.internal.R.array.perf_profile_values);
-
         mEntries = res.getStringArray(com.android.internal.R.array.perf_profile_entries);
     }
 
@@ -84,7 +72,6 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
         state.profile = arg == null ? getCurrentProfileIndex() : (Integer) arg;
         state.label = mEntries[state.profile];
         state.icon = ResourceIcon.get(mEntryIconRes[state.profile]);
-        mUiHandler.post(mStartTileAnimation);
     }
 
     @Override
@@ -95,7 +82,6 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
             mObserver.startObserving();
         } else {
             mObserver.endObserving();
-            mUiHandler.removeCallbacks(mStartTileAnimation);
         }
     }
 

@@ -73,7 +73,7 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         }
         boolean newState = !mState.value;
         mTorchManager.setTorchEnabled(newState);
-        refreshState(newState);
+        refreshState(newState ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
         qsCollapsePanel();
     }
 
@@ -83,8 +83,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
             mWasLastOn = SystemClock.uptimeMillis();
         }
 
-        if (arg instanceof Boolean) {
-            state.value = (Boolean) arg;
+        if (arg instanceof UserBoolean) {
+            state.value = ((UserBoolean) arg).value;
         }
 
         if (!state.value && mWasLastOn != 0) {
@@ -100,7 +100,9 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         // the camera is not available while it is being used for the flashlight.
         state.visible = mWasLastOn != 0 || mTorchManager.isAvailable();
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
-        state.icon = state.value ? mEnable : mDisable;
+        final AnimationIcon icon = state.value ? mEnable : mDisable;
+        icon.setAllowAnimation(arg instanceof UserBoolean && ((UserBoolean) arg).userInitiated);
+        state.icon = icon;
         int onOrOffId = state.value
                 ? R.string.accessibility_quick_settings_flashlight_on
                 : R.string.accessibility_quick_settings_flashlight_off;
@@ -118,12 +120,12 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     public void onTorchOff() {
-        refreshState(false);
+        refreshState(UserBoolean.BACKGROUND_FALSE);
     }
 
     @Override
     public void onTorchError() {
-        refreshState(false);
+        refreshState(UserBoolean.BACKGROUND_FALSE);
     }
 
     @Override

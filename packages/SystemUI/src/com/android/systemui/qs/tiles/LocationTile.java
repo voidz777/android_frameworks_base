@@ -92,23 +92,23 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         if(mController.isAdvancedSettingsEnabled()) {
-            mEnable.setAllowAnimation(true);
-            mDisable.setAllowAnimation(true);
             showDetail(true);
         } else {
             mController.setLocationEnabled(!mController.isLocationEnabled());
+            mEnable.setAllowAnimation(true);
+            mDisable.setAllowAnimation(true);
             qsCollapsePanel();
         }
     }
 
     @Override
     protected void handleSecondaryClick() {
-        mHost.startSettingsActivity(LOCATION_SETTINGS_INTENT);
+        showDetail(true);
     }
 
     @Override
     protected void handleLongClick() {
-        mHost.startSettingsActivity(LOCATION_SETTINGS_INTENT);
+        showDetail(true);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
             case Settings.Secure.LOCATION_MODE_OFF:
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_location_off);
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_location_off);
+                state.icon = mDisable;
                 break;
             case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
                 state.contentDescription = mContext.getString(
@@ -137,12 +137,12 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
             case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_location_gps_only);
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_location_on);
+                state.icon = mEnable;
                 break;
             case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_location_high_accuracy);
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_location_on);
+                state.icon = mEnable;
                 break;
             default:
                 state.contentDescription = mContext.getString(
