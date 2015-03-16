@@ -23,6 +23,10 @@
     <string-array name="config_disabledComponents" translatable="false">
     </string-array>
 
+    <!-- The list of components which should be forced to be enabled. -->
+    <string-array name="config_forceEnabledComponents" translatable="false">
+    </string-array>
+
     <!-- Timeout in MS for how long you have to long-press the back key to
          kill the foreground app. -->
     <integer name="config_backKillTimeout">2000</integer>

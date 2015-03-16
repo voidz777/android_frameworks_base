@@ -18,6 +18,7 @@
 <resources>
   <!-- Package Manager -->
   <java-symbol type="array" name="config_disabledComponents" />
+  <java-symbol type="array" name="config_forceEnabledComponents" />
 
   <!-- Power menu reboot -->
   <java-symbol type="string" name="reboot_confirm" />
