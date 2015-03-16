@@ -62,4 +62,8 @@
          Each item should list the fully-qualified activity
          name and the power profile id, separated by a comma. -->
     <string-array name="config_auto_perf_activities" translatable="false"></string-array>
+
+    <!-- The list of components which should be forced to be enabled. -->
+    <string-array name="config_forceEnabledComponents" translatable="false">
+    </string-array>
 </resources>
