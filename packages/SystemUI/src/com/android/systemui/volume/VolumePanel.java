@@ -496,10 +496,9 @@ public class VolumePanel extends Handler implements DemoMode {
         if (mDialog != null) {
             final Resources res = mContext.getResources();
             final LayoutParams lp = mDialog.getWindow().getAttributes();
-            lp.width = res.getDimensionPixelSize(
-                    com.android.systemui.R.dimen.notification_panel_width);
-            lp.gravity = res.getInteger(
-                    com.android.systemui.R.integer.notification_panel_layout_gravity);
+            lp.width = res.getDimensionPixelSize(com.android.systemui.R.dimen.notification_panel_width);
+            lp.gravity =
+                    res.getInteger(com.android.systemui.R.integer.notification_panel_layout_gravity);
             mDialog.getWindow().setAttributes(lp);
         }
     }
@@ -745,7 +744,9 @@ public class VolumePanel extends Handler implements DemoMode {
                     }
                 }
             });
-            sc.seekbarView.setMax(getStreamMaxVolume(streamType));
+            final int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
+                    streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
+            sc.seekbarView.setMax(getStreamMaxVolume(streamType) + plusOne);
             sc.seekbarView.setOnSeekBarChangeListener(mSeekListener);
             sc.seekbarView.setTag(sc);
             mStreamControls.put(streamType, sc);
@@ -1298,14 +1299,19 @@ public class VolumePanel extends Handler implements DemoMode {
                 sc.seekbarView.setMax(max);
             }
             updateSliderProgress(sc, index);
-            updateSliderEnabled(sc, isMuted(streamType),
-                    (flags & AudioManager.FLAG_FIXED_VOLUME) != 0);
+            final boolean muted = isMuted(streamType);
+            updateSliderEnabled(sc, muted, (flags & AudioManager.FLAG_FIXED_VOLUME) != 0);
+            if (isNotificationOrRing(streamType)) {
+                updateSliderIcon(sc, muted);
+            }
         }
 
         if (!isShowing()) {
             int stream = (streamType == STREAM_REMOTE_MUSIC) ? -1 : streamType;
             // when the stream is for remote playback, use -1 to reset the stream type evaluation
-            mAudioManager.forceVolumeControlStream(stream);
+            if (stream != STREAM_MASTER) {
+                mAudioManager.forceVolumeControlStream(stream);
+            }
             if (mDialog != null) {
                 mDialog.show();
                 Runnable r = new Runnable() {
