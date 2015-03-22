@@ -208,6 +208,4 @@
   <string name="live_display_outdoor">בחוץ (שמש בהירה)</string>
   <string name="live_display_outdoor_summary">השתמש בהגדרות חוץ בלבד</string>
   <string name="live_display_hint">LiveDisplay יכולה למזער את עייפות העין ולעזור לך לישון בלילה. לחץ כאן כדי לנסות!</string>
-  <string name="lock_to_app_toast_no_navbar">כדי לבטל נעיצת מסך זה, לחץ והחזק את מקש התפריט.</string>
-  <string name="lock_to_app_description_no_navbar">נעיצת מסך נועלת את המסך על תצוגה יחידה.\n\nכדי לבטל נעיצה, לחץ והחזק את מקש התפריט.</string>
 </resources>
