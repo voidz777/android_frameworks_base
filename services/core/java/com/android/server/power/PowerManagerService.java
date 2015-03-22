@@ -62,7 +62,6 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.Display;
@@ -3106,7 +3105,7 @@ public final class PowerManagerService extends SystemService
                     nativeCpuBoost(duration);
                 }
             } else {
-                Log.e(TAG, "Invalid boost duration: " + duration);
+                Slog.e(TAG, "Invalid boost duration: " + duration);
             }
         }
 
