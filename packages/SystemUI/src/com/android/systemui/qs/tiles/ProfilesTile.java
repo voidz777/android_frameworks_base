@@ -69,7 +69,6 @@ public class ProfilesTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleLongClick() {
-        super.handleLongClick();
         mHost.startSettingsActivity(PROFILES_SETTINGS);
     }
 

@@ -64,7 +64,7 @@ public class QSTileView extends ViewGroup {
     private boolean mDual;
     private OnClickListener mClickPrimary;
     private OnClickListener mClickSecondary;
-    private OnLongClickListener mClickLong;
+    private OnLongClickListener mLongClick;
     private Drawable mTileBackground;
     private RippleDrawable mRipple;
 
@@ -178,16 +178,12 @@ public class QSTileView extends ViewGroup {
     public boolean setDual(boolean dual) {
         final boolean changed = dual != mDual;
         mDual = dual;
-        if (changed) {
-            recreateLabel();
-        }
-        Drawable mTileBackground = getTileBackground();
         if (mTileBackground instanceof RippleDrawable) {
             setRipple((RippleDrawable) mTileBackground);
         }
         if (dual) {
             mTopBackgroundView.setOnClickListener(mClickPrimary);
-            mTopBackgroundView.setOnLongClickListener(mClickLong);
+            mTopBackgroundView.setOnLongClickListener(mLongClick);
             setOnClickListener(null);
             setClickable(false);
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -196,7 +192,7 @@ public class QSTileView extends ViewGroup {
             mTopBackgroundView.setOnClickListener(null);
             mTopBackgroundView.setClickable(false);
             setOnClickListener(mClickPrimary);
-            setOnLongClickListener(mClickLong);
+            setOnLongClickListener(mLongClick);
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
             setBackground(mTileBackground);
         }
@@ -219,18 +215,10 @@ public class QSTileView extends ViewGroup {
     }
 
     public void init(OnClickListener clickPrimary, OnClickListener clickSecondary,
-            OnLongClickListener clickLong) {
+            OnLongClickListener longClick) {
         mClickPrimary = clickPrimary;
         mClickSecondary = clickSecondary;
-        mClickLong = clickLong;
-    }
-
-    private Drawable getTileBackground() {
-        final int[] attrs = new int[] { android.R.attr.selectableItemBackgroundBorderless };
-        final TypedArray ta = mContext.obtainStyledAttributes(attrs);
-        final Drawable d = ta.getDrawable(0);
-        ta.recycle();
-        return d;
+        mLongClick = longClick;
     }
 
     protected View createIcon() {

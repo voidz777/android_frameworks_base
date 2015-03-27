@@ -147,6 +147,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
             default:
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_location_on);
+                state.icon = mEnable;
         }
     }
 

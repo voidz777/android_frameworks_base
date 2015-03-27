@@ -168,6 +168,3 @@ include $(BUILD_EXECUTABLE)
 endif # Not SDK_ONLY
 
 endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK
-
-LOCAL_CFLAGS += $(aaptCFlags)
-LOCAL_CPPFLAGS += -Wno-non-virtual-dtor
