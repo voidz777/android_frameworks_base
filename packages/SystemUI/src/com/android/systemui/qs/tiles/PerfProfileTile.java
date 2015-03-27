@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -31,7 +33,10 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
 
     private static final Intent BATTERY_SETTINGS = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
 
-    private int[] mEntryIconRes;
+    private AnimationIcon mHighPerf = new AnimationIcon(R.drawable.ic_qs_perf_profile_highperf_avd);
+    private AnimationIcon mBattery = new AnimationIcon(R.drawable.ic_qs_perf_profile_pwrsv_avd);
+    private AnimationIcon mBalanced = new AnimationIcon(R.drawable.ic_qs_perf_profile_bal_avd);
+
     private String[] mEntries;
     private String[] mPerfProfileValues;
     private String mPerfProfileDefaultEntry;
@@ -47,15 +52,10 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
         mPm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
         Resources res = mContext.getResources();
-        TypedArray typedArray = res.obtainTypedArray(R.array.perf_profile_drawables);
-        mEntryIconRes = new int[typedArray.length()];
-        for (int i = 0; i < mEntryIconRes.length; i++) {
-            mEntryIconRes[i] = typedArray.getResourceId(i, 0);
-        }
-        typedArray.recycle();
 
         mPerfProfileDefaultEntry = mPm.getDefaultPowerProfile();
         mPerfProfileValues = res.getStringArray(com.android.internal.R.array.perf_profile_values);
+
         mEntries = res.getStringArray(com.android.internal.R.array.perf_profile_entries);
     }
 
@@ -67,6 +67,9 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
     @Override
     protected void handleClick() {
         changeToNextProfile();
+        mHighPerf.setAllowAnimation(true);
+        mBattery.setAllowAnimation(true);
+        mBalanced.setAllowAnimation(true);
     }
 
     @Override
@@ -79,7 +82,21 @@ public class PerfProfileTile extends QSTile<PerfProfileTile.ProfileState> {
         state.visible = true;
         state.profile = arg == null ? getCurrentProfileIndex() : (Integer) arg;
         state.label = mEntries[state.profile];
-        state.icon = ResourceIcon.get(mEntryIconRes[state.profile]);
+        state.icon = getIconForState(state.profile);
+    }
+
+    private Icon getIconForState(int powerIndex) {
+        switch (powerIndex) {
+            case 0:
+                return mHighPerf;
+
+            case 1:
+                return mBattery;
+
+            default:
+            case 2:
+                return mBalanced;
+        }
     }
 
     @Override
