@@ -18,7 +18,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.LayoutTransition;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;

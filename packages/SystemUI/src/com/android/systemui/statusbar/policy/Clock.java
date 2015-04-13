@@ -25,8 +25,8 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -173,9 +173,8 @@ public class Clock implements DemoMode {
     };
 
     private final CharSequence getSmallTime() {
-        Context context = mContext;
-        boolean is24 = DateFormat.is24HourFormat(context, ActivityManager.getCurrentUser());
-        LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
+        boolean is24 = DateFormat.is24HourFormat(mContext, ActivityManager.getCurrentUser());
+        LocaleData d = LocaleData.get(mContext.getResources().getConfiguration().locale);
 
         final char MAGIC1 = '\uEF00';
         final char MAGIC2 = '\uEF01';

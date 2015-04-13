@@ -749,9 +749,7 @@ public class VolumePanel extends Handler implements DemoMode {
                     }
                 }
             });
-            final int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
-                    streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
-            sc.seekbarView.setMax(getStreamMaxVolume(streamType) + plusOne);
+            sc.seekbarView.setMax(getStreamMaxVolume(streamType));
             sc.seekbarView.setOnSeekBarChangeListener(mSeekListener);
             sc.seekbarView.setTag(sc);
             mStreamControls.put(streamType, sc);
