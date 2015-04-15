@@ -273,4 +273,8 @@
     <string name="live_display_outdoor">Outdoor (bright sun)</string>
     <string name="live_display_outdoor_summary">Use outdoor settings only</string>
     <string name="live_display_hint">LiveDisplay can help reduce eyestrain and help you sleep at night. Click here to try it out!</string>
+
+    <!-- Notification which notifies user flashlight is enabled -->
+    <string name="quick_settings_tile_flashlight_not_title">Flashlight is on</string>
+    <string name="quick_settings_tile_flashlight_not_summary">Tap to turn off</string>
 </resources>
