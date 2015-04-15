@@ -3502,6 +3502,18 @@ public final class Settings {
         public static final String DOZE_TIME_MODE = "doze_time_mode";
 
         /**
+         * Brigthness level for ambient display
+         * @hide
+         */
+        public static final String DOZE_BRIGHTNESS = "doze_brightness";
+
+        /**
+         * Auto brigthness for ambient display
+         * @hide
+         */
+        public static final String DOZE_AUTO_BRIGHTNESS = "doze_auto_brightness";
+
+        /**
          * Locale for secondary overlay on dialer for t9 search input
          * @hide
          */
