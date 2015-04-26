@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ThemeUtils;
 import android.content.res.Configuration;
 import android.content.res.ThemeConfig;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.AudioService;
@@ -443,6 +444,9 @@ public final class SystemServer {
         boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
         boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime", false);
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
+
+        String[] externalServices = Resources.getSystem()
+                .getStringArray(com.android.internal.R.array.config_externalCMServices);
 
         try {
             Slog.i(TAG, "Reading configuration...");
@@ -1139,6 +1143,15 @@ public final class SystemServer {
                 edgeGestureService.systemReady();
             } catch (Throwable e) {
                 reportWtf("making EdgeGesture service ready", e);
+            }
+        }
+
+        for (String service : externalServices) {
+            try {
+                Slog.i(TAG, service);
+                mSystemServiceManager.startService(service);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting " + service , e);
             }
         }
 
