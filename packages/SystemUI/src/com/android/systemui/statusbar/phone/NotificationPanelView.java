@@ -364,6 +364,8 @@ public class NotificationPanelView extends PanelView implements
         if (mQsSizeChangeAnimator == null) {
             mQsContainer.setHeightOverride(mQsContainer.getDesiredHeight());
         }
+
+        requestPanelHeightUpdate();
     }
 
     @Override
