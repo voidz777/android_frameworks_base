@@ -421,7 +421,7 @@ public class KeyguardViewMediator extends SystemUI {
                     // gone through setup wizard
                     synchronized (this) {
                         if (shouldWaitForProvisioning()) {
-                            if (!mShowing) {
+                            if (!isShowing()) {
                                 if (DEBUG_SIM_STATES) Log.d(TAG, "ICC_ABSENT isn't showing,"
                                         + " we need to show the keyguard since the "
                                         + "device isn't provisioned yet.");
@@ -435,7 +435,7 @@ public class KeyguardViewMediator extends SystemUI {
                 case PIN_REQUIRED:
                 case PUK_REQUIRED:
                     synchronized (this) {
-                        if (!mShowing) {
+                        if (!isShowing()) {
                             if (DEBUG_SIM_STATES) Log.d(TAG,
                                     "INTENT_VALUE_ICC_LOCKED and keygaurd isn't "
                                     + "showing; need to show keyguard so user can enter sim pin");
@@ -447,7 +447,7 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
                 case PERM_DISABLED:
                     synchronized (this) {
-                        if (!mShowing) {
+                        if (!isShowing()) {
                             if (DEBUG_SIM_STATES) Log.d(TAG, "PERM_DISABLED and "
                                   + "keygaurd isn't showing.");
                             doKeyguardLocked(null);
@@ -460,7 +460,9 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
                 case READY:
                     synchronized (this) {
-                        if (mShowing) {
+                        if (mInternallyDisabled) {
+                            hideLocked();
+                        } else if (isShowing()) {
                             resetStateLocked();
                         }
                     }
@@ -678,7 +680,7 @@ public class KeyguardViewMediator extends SystemUI {
                     Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
                 }
                 mExitSecureCallback = null;
-                if (!mExternallyEnabled) {
+                if (!mInternallyDisabled && !mExternallyEnabled) {
                     hideLocked();
                 }
             } else if (mShowing) {
@@ -778,6 +780,10 @@ public class KeyguardViewMediator extends SystemUI {
             if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled externally");
             return true;
         }
+        if (mInternallyDisabled) {
+            if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled internally");
+            return true;
+        }
         if (mLockPatternUtils.isLockScreenDisabled()) {
             if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled by setting");
             return true;
@@ -844,14 +850,14 @@ public class KeyguardViewMediator extends SystemUI {
     public void setKeyguardEnabled(boolean enabled) {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "setKeyguardEnabled(" + enabled + ")");
-
-            if (mInternallyDisabled && enabled && !lockscreenEnforcedByDevicePolicy()) {
+            mExternallyEnabled = enabled;
+            if (mInternallyDisabled
+                    && enabled
+                    && !lockscreenEnforcedByDevicePolicy()) {
                 // if keyguard is forcefully disabled internally (by lock screen tile), don't allow
                 // it to be enabled externally, unless the device policy manager says so.
                 return;
             }
-
-            mExternallyEnabled = enabled;
 
             if (!enabled && mShowing) {
                 if (mExitSecureCallback != null) {
@@ -944,6 +950,13 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     /**
+     * Is the keyguard currently showing?
+     */
+    public boolean isShowing() {
+        return mShowing;
+    }
+
+    /**
      * Is the keyguard currently showing and not being force hidden?
      */
     public boolean isShowingAndNotOccluded() {
@@ -1017,22 +1030,6 @@ public class KeyguardViewMediator extends SystemUI {
      * Enable the keyguard if the settings are appropriate.
      */
     private void doKeyguardLocked(Bundle options) {
-        // if another app is disabling us, don't show
-        if (!mExternallyEnabled) {
-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
-
-            // note: we *should* set mNeedToReshowWhenReenabled=true here, but that makes
-            // for an occasional ugly flicker in this situation:
-            // 1) receive a call with the screen on (no keyguard) or make a call
-            // 2) screen times out
-            // 3) user hits key to turn screen back on
-            // instead, we reenable the keyguard when we know the screen is off and the call
-            // ends (see the broadcast receiver below)
-            // TODO: clean this up when we have better support at the window manager level
-            // for apps that wish to be on top of the keyguard
-            return;
-        }
-
         // if the keyguard is already showing, don't bother
         if (mStatusBarKeyguardViewManager.isShowing()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
@@ -1052,6 +1049,22 @@ public class KeyguardViewMediator extends SystemUI {
         if (!lockedOrMissing && shouldWaitForProvisioning()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
                     + " and the sim is not locked or missing");
+            return;
+        }
+
+        // if another app is disabling us, don't show
+        if (!mExternallyEnabled && !lockedOrMissing) {
+            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
+
+            // note: we *should* set mNeedToReshowWhenReenabled=true here, but that makes
+            // for an occasional ugly flicker in this situation:
+            // 1) receive a call with the screen on (no keyguard) or make a call
+            // 2) screen times out
+            // 3) user hits key to turn screen back on
+            // instead, we reenable the keyguard when we know the screen is off and the call
+            // ends (see the broadcast receiver below)
+            // TODO: clean this up when we have better support at the window manager level
+            // for apps that wish to be on top of the keyguard
             return;
         }
 
