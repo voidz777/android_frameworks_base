@@ -128,6 +128,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -346,6 +347,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     View mFlipSettingsView;
     private QSPanel mQSPanel;
 
+    // task manager
+    private TaskManager mTaskManager;
+    private LinearLayout mTaskManagerPanel;
+    private ImageButton mTaskManagerButton;
+    private boolean mShowTaskManager;
+    private boolean showTaskList = false;
+
     // top bar
     StatusBarHeaderView mHeader;
     KeyguardStatusBarView mKeyguardStatusBar;
@@ -476,6 +484,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.Secure.RECENTS_LONG_PRESS_ACTIVITY), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_SHOW), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.ENABLE_TASK_MANAGER), false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -557,8 +567,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 Settings.System.NAVIGATION_BAR_SHOW, 1, UserHandle.USER_CURRENT) == 1;
             }
 
-            mBatterySaverBarColor = Settings.System.getIntForUser(
-                    resolver, Settings.System.BATTERY_SAVER_MODE_COLOR, 1, UserHandle.USER_CURRENT) == 1;
+            mBatterySaverBarColor = Settings.System.getIntForUser(resolver,
+                    Settings.System.BATTERY_SAVER_MODE_COLOR, 1, UserHandle.USER_CURRENT) == 1;
+
+            mShowTaskManager = Settings.System.getIntForUser(resolver,
+                    Settings.System.ENABLE_TASK_MANAGER, 0, UserHandle.USER_CURRENT) == 1;
 
             // This method reads Settings.Secure.RECENTS_LONG_PRESS_ACTIVITY
             updateCustomRecentsLongPressHandler(false);
@@ -1223,6 +1236,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             });
         }
 
+        // Task manager
+        mTaskManagerPanel =
+                (LinearLayout) mStatusBarWindowContent.findViewById(R.id.task_manager_panel);
+        mTaskManager = new TaskManager(mContext, mTaskManagerPanel);
+        mTaskManager.setActivityStarter(this);
+        mTaskManagerButton = (ImageButton) mHeader.findViewById(R.id.task_manager_button);
+        mTaskManagerButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                showTaskList = !showTaskList;
+                mNotificationPanel.setTaskManagerVisibility(showTaskList);
+            }
+        });
+
         // Set up the initial custom tile listener state.
         try {
             mCustomTileListenerService.registerAsSystemService(mContext,
@@ -1233,7 +1260,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mQSPanel.getHost().setCustomTileListenerService(mCustomTileListenerService);
-
         // User info. Trigger first load.
         mHeader.setUserInfoController(mUserInfoController);
         mKeyguardStatusBar.setUserInfoController(mUserInfoController);
@@ -2727,6 +2753,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mWaitingForKeyguardExit = false;
         disable(mDisabledUnmodified, !force /* animate */);
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
+        if (mShowTaskManager) {
+            mTaskManager.refreshTaskManagerView();
+        }
     }
 
     public void animateCollapsePanels() {

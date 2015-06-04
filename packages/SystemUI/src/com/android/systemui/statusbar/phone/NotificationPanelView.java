@@ -43,6 +43,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -200,6 +201,10 @@ public class NotificationPanelView extends PanelView implements
     private float mKeyguardStatusBarAnimateAlpha = 1f;
     private int mOldLayoutDirection;
 
+    // Task manager
+    private boolean mShowTaskManager;
+    private LinearLayout mTaskManagerPanel;
+
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
@@ -239,6 +244,7 @@ public class NotificationPanelView extends PanelView implements
                 }
             }
         });
+        mTaskManagerPanel = (LinearLayout) findViewById(R.id.task_manager_panel);
         mClockView = (TextView) findViewById(R.id.clock_view);
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         mScrollView.setListener(this);
@@ -362,6 +368,8 @@ public class NotificationPanelView extends PanelView implements
         if (mQsSizeChangeAnimator == null) {
             mQsContainer.setHeightOverride(mQsContainer.getDesiredHeight());
         }
+
+        requestPanelHeightUpdate();
     }
 
     @Override
@@ -1175,7 +1183,6 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setScrollingEnabled(
                 mStatusBarState != StatusBarState.KEYGUARD && (!mQsExpanded
                         || mQsExpansionFromOverscroll));
-        mQsPanel.setVisibility(expandVisually ? View.VISIBLE : View.INVISIBLE);
         mQsContainer.setVisibility(
                 mKeyguardShowing && !expandVisually ? View.INVISIBLE : View.VISIBLE);
         mScrollView.setTouchEnabled(mQsExpanded);
@@ -1405,6 +1412,17 @@ public class NotificationPanelView extends PanelView implements
             return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0) && isInQsArea(x, y);
         } else {
             return onHeader || showQsOverride;
+        }
+    }
+
+    public void setTaskManagerVisibility(boolean mTaskManagerShowing) {
+        if (mShowTaskManager) {
+            cancelAnimation();
+            boolean expandVisually = mQsExpanded || mStackScrollerOverscrolling;
+            mQsPanel.setVisibility(expandVisually && !mTaskManagerShowing
+                    ? View.VISIBLE : View.GONE);
+            mTaskManagerPanel.setVisibility(expandVisually && mTaskManagerShowing
+                    ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -2142,6 +2160,8 @@ public class NotificationPanelView extends PanelView implements
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_SMART_PULLDOWN),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.ENABLE_TASK_MANAGER), false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -2166,6 +2186,8 @@ public class NotificationPanelView extends PanelView implements
             mQsSmartPullDown = Settings.System.getIntForUser(
                     resolver, Settings.System.QS_SMART_PULLDOWN, 0,
                     UserHandle.USER_CURRENT);
+            mShowTaskManager = Settings.System.getIntForUser(resolver,
+                    Settings.System.ENABLE_TASK_MANAGER, 0, UserHandle.USER_CURRENT) == 1;
         }
     }
 }
