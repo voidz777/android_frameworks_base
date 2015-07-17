@@ -1676,6 +1676,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public void updateSettings() {
+        Slog.i(TAG, "+++++ updateSettings() mUserRotationMode; " + mUserRotationMode + ", mUserRotation: " + mUserRotation);
         ContentResolver resolver = mContext.getContentResolver();
         boolean updateRotation = false;
         synchronized (mLock) {
@@ -1831,6 +1832,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             WindowManagerPolicyControl.reloadFromSetting(mContext);
         }
+        Slog.i(TAG, "----- updateSettings() mUserRotationMode; " + mUserRotationMode + ", mUserRotation: " + mUserRotation + "updateRotation: " + updateRotation);
         if (updateRotation) {
             updateRotation(true);
         }
@@ -5751,7 +5753,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public int rotationForOrientationLw(int orientation, int lastRotation) {
-        if (false) {
+        if (true) {
             Slog.v(TAG, "rotationForOrientationLw(orient="
                         + orientation + ", last=" + lastRotation
                         + "); user=" + mUserRotation + " "
@@ -5960,6 +5962,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // User rotation: to be used when all else fails in assigning an orientation to the device
     @Override
     public void setUserRotationMode(int mode, int rot) {
+        Slog.i(TAG, "setUserRotationMode() called with " + "mode = [" + mode + "], rot = [" + rot + "]");
         ContentResolver res = mContext.getContentResolver();
 
         // mUserRotationMode and mUserRotation will be assigned by the content observer

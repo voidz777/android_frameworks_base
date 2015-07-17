@@ -145,6 +145,9 @@
     <!-- AppSidebar -->
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
+    <!-- CM Settings -->
+    <uses-permission android:name="cyanogenmod.permission.WRITE_SETTINGS" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
