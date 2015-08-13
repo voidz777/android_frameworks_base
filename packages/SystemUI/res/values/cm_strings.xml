@@ -301,4 +301,7 @@
     <string name="dynamic_qs_tile_ime_selector_label">IME selector</string>
     <string name="dynamic_qs_tile_su_label">Root access</string>
     <string name="dynamic_qs_tile_adb_label" translatable="false">ADB</string>
+
+    <!-- Empty view text for CustomQSTile -->
+    <string name="quick_settings_custom_qs_detail_empty_text">No items found</string>
 </resources>
