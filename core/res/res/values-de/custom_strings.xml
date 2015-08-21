@@ -27,9 +27,6 @@
     <!-- label for screen record item in phone options dialog -->
     <string name="global_action_screen_record">Bildschirmrekorder</string>
     
-    <string name="silent_mode_priority">Wichtig</string>
-    <string name="silent_mode_none">Keine</string>
-    
     <!-- AOKP custom system animations -->    
     <string name="animation_fade">Verblassen</string>
     <string name="animation_slide_right">Von rechts einblenden</string>
