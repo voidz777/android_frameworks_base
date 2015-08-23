@@ -76,25 +76,28 @@
 
                 <com.android.keyguard.CarrierText
                     android:id="@+id/statusbar_carrier_text"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
-                    android:ellipsize="end"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-                    android:textSize="@dimen/status_bar_clock_size"
-                    android:textColor="#ffffff"
                     android:singleLine="true"
+                    android:ellipsize="end"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="4dp"
                     android:gravity="center"
                     android:visibility="gone"
                     />
 
                 <TextView
                     android:id="@+id/left_weather_temp"
+                    android:textAppearance="@style/TextAppearance.StatusBar.WeatherTemp"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:singleLine="true"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="4dp"
                     android:gravity="center"
-                    android:textAppearance="@style/TextAppearance.StatusBar.WeatherTemp"
-                    android:paddingEnd="6dp" />
+                    android:visibility="gone"
+                    />
 
                 <com.android.systemui.statusbar.StatusBarIconView android:id="@+id/moreIcon"
                     android:layout_width="@dimen/status_bar_icon_size"
@@ -127,11 +130,11 @@
 
             <TextView
                 android:id="@+id/weather_temp"
+                android:textAppearance="@style/TextAppearance.StatusBar.WeatherTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="true"
                 android:gravity="right|center_vertical"
-                android:textAppearance="@style/TextAppearance.StatusBar.WeatherTemp"
                 android:paddingStart="2dp"
                 android:paddingEnd="4dp"
                 android:visibility="gone" />
