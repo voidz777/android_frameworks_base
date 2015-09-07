@@ -438,10 +438,6 @@ public class AppSidebar extends TriggerOverlayView {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (mFloatingWindow) {
-            intent.addFlags(Intent.FLAG_FLOATING_WINDOW);
-            mFloatingWindow = false;
-        }
         intent.setComponent(cn);
         try {
             mContext.startActivity(intent);
