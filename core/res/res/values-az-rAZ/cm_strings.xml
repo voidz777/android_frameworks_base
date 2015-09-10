@@ -17,21 +17,9 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="profileNameDefault">İlkin</string>
-  <string name="profileNameWork">İş</string>
-  <string name="profileNameHome">Ev</string>
-  <string name="profileNameSilent">Səssiz</string>
-  <string name="profileNameNight">Gecə</string>
-  <string name="profileNameAutomobile">Avtomobil</string>
-  <string name="profileGroupPhone">Telefon</string>
-  <string name="profileGroupCalendar">Təqvim</string>
-  <string name="profileGroupGmail">Gmail</string>
-  <string name="profileGroupEmail">E-poçt</string>
-  <string name="profileGroupSMS">SMS</string>
-  <string name="wildcardProfile">Digər</string>
-  <string name="profile_none">Yoxdur</string>
   <string name="profile_picker_title">Profillər</string>
   <string name="global_action_choose_profile">Profil</string>
+  <string name="profile_none">Yoxdur</string>
   <string name="global_action_screenshot">Ekran şəkli</string>
   <string name="permlab_receiveProtectedSms">qorunan SMS qəbul et</string>
   <string name="permdesc_receiveProtectedSms">Tətbiqetməyə qorunan bir SMS qəbul etmə icazəsi verər.</string>
@@ -53,8 +41,6 @@
   <string name="permdesc_changePrivacyGuardState">Tətbiqetməyə başqa bir tətbiqetmənin Gizlilik Qorumasını işlədib işlədə bilməyəcəyini müəyyənləşdirmə imkanı verər. Əgər tətbiqetmə Gizlilik Qoruması ilə işləyərsə şəxslər, zəng qeydləri və ya mesajlar kimi şəxsi verilənlərə müraciət edə bilməyəcək.</string>
   <string name="privacy_guard_notification">Gizlilik Qoruması fəaldır</string>
   <string name="privacy_guard_notification_detail"><xliff:g id="app">%1$s</xliff:g> şəxsi verilənlərə müraciət edə bilməyəcək</string>
-  <string name="permlab_useHardwareFramework">təchizat infrastrukturundan istifadə et</string>
-  <string name="permdesc_useHardwareFramework">Tətbiqetmənin CM təchizat infrastrukturuna müraciətinə icazə verər.</string>
   <string name="permlab_setKeyguardWallpaper">klaviatura divar kağızını tənzimlə</string>
   <string name="permdesc_setKeyguardWallpaper">Tətbiqetmənin kilit ekranı divar kağızını dəyişdirməsinə icazə verər.</string>
   <string name="privacy_guard_dialog_title">Gizlilik Qoruması</string>

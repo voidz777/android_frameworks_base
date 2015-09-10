@@ -20,11 +20,14 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.content.res.ThemeConfig;
 import android.content.res.TypedArray;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -37,12 +40,14 @@ import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.NavbarEditor;
+import com.android.systemui.statusbar.phone.NavigationBarView;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
@@ -71,6 +76,8 @@ public class KeyButtonView extends ImageView {
     private boolean mPerformedLongClick;
 
     private PowerManager mPm;
+
+    private final Handler mHandler = new Handler();
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -155,6 +162,27 @@ public class KeyButtonView extends ImageView {
             return true;
         }
         return super.performAccessibilityAction(action, arguments);
+    }
+
+    @Override
+    public Resources getResources() {
+        ThemeConfig themeConfig = mContext.getResources().getConfiguration().themeConfig;
+        Resources res = null;
+        if (themeConfig != null) {
+            try {
+                final String navbarThemePkgName = themeConfig.getOverlayForNavBar();
+                final String sysuiThemePkgName = themeConfig.getOverlayForStatusBar();
+                // Check if the same theme is applied for systemui, if so we can skip this
+                if (navbarThemePkgName != null && !navbarThemePkgName.equals(sysuiThemePkgName)) {
+                    res = mContext.getPackageManager().getThemedResourcesForApplication(
+                            mContext.getPackageName(), navbarThemePkgName);
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // don't care since we'll handle res being null below
+            }
+        }
+
+        return res != null ? res : super.getResources();
     }
 
     public void setQuiescentAlpha(float alpha, boolean animate) {
@@ -305,8 +333,23 @@ public class KeyButtonView extends ImageView {
                 break;
         }
 
+        mHandler.post(mNavButtonDimActivator);
+
         return true;
     }
+
+    private final Runnable mNavButtonDimActivator = new Runnable() {
+        @Override
+        public void run() {
+            ViewParent parent = getParent();
+            while (parent != null && !(parent instanceof NavigationBarView)) {
+                parent = parent.getParent();
+            }
+            if (parent != null) {
+                ((NavigationBarView) parent).onNavButtonTouched();
+            }
+        }
+    };
 
     public void playSoundEffect(int soundConstant) {
         mAudioManager.playSoundEffect(soundConstant, ActivityManager.getCurrentUser());

@@ -17,21 +17,9 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="profileNameDefault">Predet.</string>
-  <string name="profileNameWork">Trabayu</string>
-  <string name="profileNameHome">Aniciu</string>
-  <string name="profileNameSilent">Silenciu</string>
-  <string name="profileNameNight">Nueche</string>
-  <string name="profileNameAutomobile">Automóvil</string>
-  <string name="profileGroupPhone">Teléfonu</string>
-  <string name="profileGroupCalendar">Calendariu</string>
-  <string name="profileGroupGmail">Gmail</string>
-  <string name="profileGroupEmail">Corréu</string>
-  <string name="profileGroupSMS">SMS</string>
-  <string name="wildcardProfile">Otru</string>
-  <string name="profile_none">Darréu</string>
   <string name="profile_picker_title">Perfiles</string>
   <string name="global_action_choose_profile">Perfil</string>
+  <string name="profile_none">Darréu</string>
   <string name="global_action_screenshot">Capturar pantalla</string>
   <string name="permlab_receiveProtectedSms">recibir SMS protexíos</string>
   <string name="permdesc_receiveProtectedSms">Permite que l\'aplicación reciba mensaxes SMS entrantes protexíos.</string>
@@ -53,8 +41,6 @@
   <string name="permdesc_changePrivacyGuardState">Permite que l\'aplicación cambie l\'estáu de privacidá d\'otra. Cuando una aplicación s\'executa cola privacidá habilitada, nun va poder acceder a los datos personales, talos como contautos, mensaxes o rexistros de llamaes.</string>
   <string name="privacy_guard_notification">Privacidá activada</string>
   <string name="privacy_guard_notification_detail"><xliff:g id="app">%1$s</xliff:g> nun va poder acceder a los datos personales</string>
-  <string name="permlab_useHardwareFramework">usar marcu de hardware</string>
-  <string name="permdesc_useHardwareFramework">Permite que l\'aplicación acceda al marcu de hardware de CM.</string>
   <string name="permlab_setKeyguardWallpaper">Afita\'l fondu de pantalla de bloquéu</string>
   <string name="permdesc_setKeyguardWallpaper">Permite que l\'aplicación afite\'l fondu de la pantalla de bloquéu.</string>
   <string name="privacy_guard_dialog_title">Privacidá</string>

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -28,6 +29,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 
+import cyanogenmod.hardware.CMHardwareManager;
+
 /** Quick settings tile: LiveDisplay mode switcher **/
 public class LiveDisplayTile extends QSTile<LiveDisplayTile.LiveDisplayState> {
 
@@ -36,6 +39,8 @@ public class LiveDisplayTile extends QSTile<LiveDisplayTile.LiveDisplayState> {
 
     private final LiveDisplayObserver mObserver;
     private final String[] mEntries;
+    private final String[] mDescriptionEntries;
+    private final String[] mAnnouncementEntries;
     private final String[] mValues;
     private final int[] mEntryIconRes;
 
@@ -63,14 +68,17 @@ public class LiveDisplayTile extends QSTile<LiveDisplayTile.LiveDisplayState> {
         typedArray.recycle();
 
         mEntries = res.getStringArray(com.android.internal.R.array.live_display_entries);
+        mDescriptionEntries = res.getStringArray(R.array.live_display_description);
+        mAnnouncementEntries = res.getStringArray(R.array.live_display_announcement);
         mValues = res.getStringArray(com.android.internal.R.array.live_display_values);
 
-        mOutdoorModeAvailable = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.DISPLAY_AUTO_OUTDOOR_MODE,
-                -1, UserHandle.USER_CURRENT) > -1;
+        mOutdoorModeAvailable =
+                CMHardwareManager.getInstance(mContext)
+                    .isSupported(CMHardwareManager.FEATURE_SUNLIGHT_ENHANCEMENT);
 
         mDefaultDayTemperature = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_dayColorTemperature);
+        loadDayTemperature();
 
         mObserver = new LiveDisplayObserver(mHandler);
         mObserver.startObserving();
@@ -109,6 +117,12 @@ public class LiveDisplayTile extends QSTile<LiveDisplayTile.LiveDisplayState> {
         state.mode = arg == null ? getCurrentModeIndex() : (Integer) arg;
         state.label = mEntries[state.mode];
         state.icon = ResourceIcon.get(mEntryIconRes[state.mode]);
+        state.contentDescription = mDescriptionEntries[state.mode];
+    }
+
+    @Override
+    protected String composeChangeAnnouncement() {
+        return mAnnouncementEntries[getCurrentModeIndex()];
     }
 
     private int getCurrentModeIndex() {
@@ -146,6 +160,13 @@ public class LiveDisplayTile extends QSTile<LiveDisplayTile.LiveDisplayState> {
                 Integer.valueOf(mValues[next]), UserHandle.USER_CURRENT);
     }
 
+    private void loadDayTemperature() {
+        mDayTemperature = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.DISPLAY_TEMPERATURE_DAY,
+                mDefaultDayTemperature,
+                UserHandle.USER_CURRENT);
+    }
+
     private class LiveDisplayObserver extends ContentObserver {
         public LiveDisplayObserver(Handler handler) {
             super(handler);
@@ -153,10 +174,7 @@ public class LiveDisplayTile extends QSTile<LiveDisplayTile.LiveDisplayState> {
 
         @Override
         public void onChange(boolean selfChange) {
-            mDayTemperature = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.DISPLAY_TEMPERATURE_DAY,
-                    mDefaultDayTemperature,
-                    UserHandle.USER_CURRENT);
+            loadDayTemperature();
             refreshState(getCurrentModeIndex());
         }
 

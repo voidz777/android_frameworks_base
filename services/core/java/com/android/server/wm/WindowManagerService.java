@@ -59,7 +59,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ThemeUtils;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -298,6 +297,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
+    private static final String PERSIST_SYS_LCD_DENSITY = "persist.sys.lcd_density";
     private static final String DENSITY_OVERRIDE = "ro.config.density_override";
     private static final String SIZE_OVERRIDE = "ro.config.size_override";
 
@@ -313,12 +313,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
     private final int mSfHwRotation;
-
-    private BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            mUiContext = null;
-        }
-    };
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -343,8 +337,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int[] mCurrentProfileIds = new int[] {UserHandle.USER_OWNER};
 
     final Context mContext;
-
-    private Context mUiContext;
 
     final boolean mHaveInputMethods;
 
@@ -932,17 +924,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Load hardware rotation from prop
         mSfHwRotation = android.os.SystemProperties.getInt("ro.sf.hwrotation",0) / 90;
-        ThemeUtils.registerThemeChangeReceiver(mContext, mThemeChangeReceiver);
+
         updateCircularDisplayMaskIfNeeded();
         showEmulatorDisplayOverlayIfNeeded();
-    }
-
-    private Context getUiContext() {
-        if (mUiContext == null) {
-            mUiContext = ThemeUtils.createUiContext(mContext);
-            mUiContext.setTheme(android.R.style.Theme_DeviceDefault_Light_DarkActionBar);
-        }
-        return mUiContext != null ? mUiContext : mContext;
     }
 
     public InputMonitor getInputMonitor() {
@@ -5718,19 +5702,13 @@ public class WindowManagerService extends IWindowManager.Stub
     // Called by window manager policy.  Not exposed externally.
     @Override
     public void shutdown(boolean confirm) {
-        ShutdownThread.shutdown(getUiContext(), confirm);
+        ShutdownThread.shutdown(mContext, confirm);
     }
 
     // Called by window manager policy.  Not exposed externally.
     @Override
     public void rebootSafeMode(boolean confirm) {
-        ShutdownThread.rebootSafeMode(getUiContext(), confirm);
-    }
-
-    // Called by window manager policy.  Not exposed externally.
-    @Override
-    public void reboot() {
-        ShutdownThread.reboot(getUiContext(), null, true);
+        ShutdownThread.rebootSafeMode(mContext, confirm);
     }
 
     public void setCurrentProfileIds(final int[] currentProfileIds) {
@@ -8492,6 +8470,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public int getInitialDisplayDensity(int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return DisplayMetrics.DENSITY_DEVICE_DEFAULT;
+        }
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
@@ -8505,6 +8486,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public int getBaseDisplayDensity(int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return DisplayMetrics.DENSITY_PREFERRED;
+        }
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
@@ -8532,6 +8516,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized(mWindowMap) {
                 final DisplayContent displayContent = getDisplayContentLocked(displayId);
                 if (displayContent != null) {
+                    SystemProperties.set(PERSIST_SYS_LCD_DENSITY, Integer.toString(density));
                     setForcedDisplayDensityLocked(displayContent, density);
                     Settings.Global.putString(mContext.getContentResolver(),
                             Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
@@ -8539,6 +8524,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+        try {
+            ActivityManagerNative.getDefault().restart();
+        } catch (RemoteException e) {
         }
     }
 
@@ -8568,6 +8557,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized(mWindowMap) {
                 final DisplayContent displayContent = getDisplayContentLocked(displayId);
                 if (displayContent != null) {
+                    SystemProperties.set(PERSIST_SYS_LCD_DENSITY, null);
                     setForcedDisplayDensityLocked(displayContent,
                             displayContent.mInitialDisplayDensity);
                     Settings.Global.putString(mContext.getContentResolver(),
@@ -8576,6 +8566,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+        try {
+            ActivityManagerNative.getDefault().restart();
+        } catch (RemoteException e) {
         }
     }
 
@@ -11924,5 +11918,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowManagerService.this.removeWindowToken(token);
             }
         }
+    }
+
+    /* @hide */
+    @Override
+    public int getSystemUIVisibility() {
+        return mLastStatusBarVisibility;
     }
 }

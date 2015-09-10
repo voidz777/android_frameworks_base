@@ -44,4 +44,11 @@
     <string name="animation_grow_shrink_right">伸展（右）</string>
     <string name="action_null">空白</string>
 
+    <!-- Floating Window -->
+    <string name="floating_window_snap_top">往上靠</string>
+    <string name="floating_window_snap_bottom">往下靠</string>
+    <string name="floating_window_snap_left">往左靠</string>
+    <string name="floating_window_snap_right">往右靠</string>
+    <string name="floating_window_minimize">最小化</string>
+
 </resources>

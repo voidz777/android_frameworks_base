@@ -16,32 +16,15 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Names of default profiles. -->
-    <string name="profileNameDefault">Default</string>
-    <string name="profileNameWork">Work</string>
-    <string name="profileNameHome">Home</string>
-    <string name="profileNameSilent">Silent</string>
-    <string name="profileNameNight">Night</string>
-    <string name="profileNameAutomobile">Automobile</string>
-
-    <!-- Names of application groups. -->
-    <string name="profileGroupPhone">Phone</string>
-    <string name="profileGroupCalendar">Calendar</string>
-    <string name="profileGroupGmail">Gmail</string>
-    <string name="profileGroupEmail">Email</string>
-    <string name="profileGroupSMS">SMS</string>
-
-    <!-- Name of wildcard profile. -->
-    <string name="wildcardProfile">Other</string>
-
-     <!-- The item label for the no profile selection item. -->
-     <string name="profile_none">None</string>
-
-     <!-- The title of the profile picker dialog. -->
-     <string name="profile_picker_title">Profiles</string>
+    <!-- The title of the profile picker dialog. -->
+    <string name="profile_picker_title">Profiles</string>
 
     <!-- label for item that opens the profile choosing dialog -->
     <string name="global_action_choose_profile">Profile</string>
+
+    <!-- The item label for the no profile selection item. -->
+    <string name="profile_none">None</string>
+
     <!-- label for item that screenshots in phone options dialog -->
     <string name="global_action_screenshot">Screenshot</string>
 
@@ -82,11 +65,6 @@
     <string name="permdesc_changePrivacyGuardState">Allows the app to change whether another app runs with Privacy Guard. When an app is running with Privacy Guard, it will not have access to personal data such as contacts, call logs, or messages.</string>
     <string name="privacy_guard_notification">Privacy Guard active</string>
     <string name="privacy_guard_notification_detail"><xliff:g id="app">%1$s</xliff:g> will not be able to access personal data</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
-    <string name="permlab_useHardwareFramework">use hardware framework</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_useHardwareFramework">Allows an app access to the CM hardware framework.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
     <string name="permlab_setKeyguardWallpaper">set keyguard wallpaper</string>
@@ -135,6 +113,12 @@
     <string name="adb_active_generic_notification_message">Touch to disable debugging.</string>
     <!-- USB_PREFERENCES: Notification for when no USB options chosen.  This is the title -->
     <string name="usb_choose_notification_title">Touch to choose USB options.</string>
+
+    <!-- ADB custom tile -->
+    <string name="adb_active_custom_tile">ADB - <xliff:g id="adb_type" example="USB">%1$s</xliff:g></string>
+    <string name="adb_active_custom_tile_both">USB &amp; network</string>
+    <string name="adb_active_custom_tile_usb">USB</string>
+    <string name="adb_active_custom_tile_net">Network</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
     <string name="permlab_interceptPackageLaunch">intercept app launch</string>

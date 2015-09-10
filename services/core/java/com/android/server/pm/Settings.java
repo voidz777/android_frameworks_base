@@ -153,6 +153,9 @@ final class Settings {
     static final String TAG_CROSS_PROFILE_INTENT_FILTERS =
             "crossProfile-intent-filters";
 
+    private static final String TAG_PROTECTED_COMPONENTS = "protected-components";
+    private static final String TAG_VISIBLE_COMPONENTS = "visible-components";
+
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
     private static final String ATTR_CODE = "code";
@@ -579,7 +582,9 @@ final class Settings {
                                     true, // notLaunched
                                     false, // hidden
                                     null, null, null,
-                                    false // blockUninstall
+                                    false, // blockUninstall
+                                    null,
+                                    null
                                     );
                             writePackageRestrictionsLPr(user.id);
                         }
@@ -1086,7 +1091,9 @@ final class Settings {
                                 false,  // notLaunched
                                 false,  // hidden
                                 null, null, null,
-                                false // blockUninstall
+                                false, // blockUninstall
+                                null,
+                                null
                                 );
                     }
                     return;
@@ -1156,8 +1163,11 @@ final class Settings {
                     final boolean blockUninstall = blockUninstallStr == null
                             ? false : Boolean.parseBoolean(blockUninstallStr);
 
+
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
+                    ArraySet<String> protectedComponents = null;
+                    ArraySet<String> visibleComponents = null;
 
                     int packageDepth = parser.getDepth();
                     while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -1172,11 +1182,16 @@ final class Settings {
                             enabledComponents = readComponentsLPr(parser);
                         } else if (tagName.equals(TAG_DISABLED_COMPONENTS)) {
                             disabledComponents = readComponentsLPr(parser);
+                        } else if (tagName.equals(TAG_PROTECTED_COMPONENTS)) {
+                            protectedComponents = readComponentsLPr(parser);
+                        } else if (tagName.equals(TAG_VISIBLE_COMPONENTS)) {
+                            visibleComponents = readComponentsLPr(parser);
                         }
                     }
 
                     ps.setUserState(userId, enabled, installed, stopped, notLaunched, hidden,
-                            enabledCaller, enabledComponents, disabledComponents, blockUninstall);
+                            enabledCaller, enabledComponents, disabledComponents, blockUninstall,
+                            protectedComponents, visibleComponents);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -1323,7 +1338,11 @@ final class Settings {
                                 && ustate.enabledComponents.size() > 0)
                         || (ustate.disabledComponents != null
                                 && ustate.disabledComponents.size() > 0)
-                        || ustate.blockUninstall) {
+                        || ustate.blockUninstall
+                        || (ustate.protectedComponents != null
+                                && ustate.protectedComponents.size() > 0)
+                        || (ustate.visibleComponents != null
+                                && ustate.visibleComponents.size() > 0)) {
                     serializer.startTag(null, TAG_PACKAGE);
                     serializer.attribute(null, ATTR_NAME, pkg.name);
                     if (DEBUG_MU) Log.i(TAG, "  pkg=" + pkg.name + ", state=" + ustate.enabled);
@@ -1370,6 +1389,26 @@ final class Settings {
                             serializer.endTag(null, TAG_ITEM);
                         }
                         serializer.endTag(null, TAG_DISABLED_COMPONENTS);
+                    }
+                    if (ustate.protectedComponents != null
+                            && ustate.protectedComponents.size() > 0) {
+                        serializer.startTag(null, TAG_PROTECTED_COMPONENTS);
+                        for (final String name : ustate.protectedComponents) {
+                            serializer.startTag(null, TAG_ITEM);
+                            serializer.attribute(null, ATTR_NAME, name);
+                            serializer.endTag(null, TAG_ITEM);
+                        }
+                        serializer.endTag(null, TAG_PROTECTED_COMPONENTS);
+                    }
+                    if (ustate.visibleComponents != null
+                            && ustate.visibleComponents.size() > 0) {
+                        serializer.startTag(null, TAG_VISIBLE_COMPONENTS);
+                        for (final String name : ustate.visibleComponents) {
+                            serializer.startTag(null, TAG_ITEM);
+                            serializer.attribute(null, ATTR_NAME, name);
+                            serializer.endTag(null, TAG_ITEM);
+                        }
+                        serializer.endTag(null, TAG_VISIBLE_COMPONENTS);
                     }
                     serializer.endTag(null, TAG_PACKAGE);
                 }
@@ -1985,6 +2024,9 @@ final class Settings {
                     }
                 }
             }
+            if (bp.allowViaWhitelist) {
+                serializer.attribute(null, "allowViaWhitelist", Integer.toString(1));
+            }
             serializer.endTag(null, TAG_ITEM);
         }
     }
@@ -2449,6 +2491,11 @@ final class Settings {
             for (int i=0; i<ri.size(); i++) {
                 ActivityInfo ai = ri.get(i).activityInfo;
                 set[i] = new ComponentName(ai.packageName, ai.name);
+                // We have already discovered the best third party match,
+                // so we only need to finish filling set with all results.
+                if (haveNonSys != null) {
+                    continue;
+                }
                 if ((ai.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
                     if (ri.get(i).match >= thirdPartyMatch) {
                         // Keep track of the best match we find of all third
@@ -2457,7 +2504,6 @@ final class Settings {
                         if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
                                 + ai.packageName + "/" + ai.name + ": non-system!");
                         haveNonSys = set[i];
-                        break;
                     }
                 } else if (cn.getPackageName().equals(ai.packageName)
                         && cn.getClassName().equals(ai.name)) {
@@ -2602,6 +2648,8 @@ final class Settings {
                     bp.protectionLevel = readInt(parser, null, "protection",
                             PermissionInfo.PROTECTION_NORMAL);
                     bp.protectionLevel = PermissionInfo.fixProtectionLevel(bp.protectionLevel);
+                    bp.allowViaWhitelist = readInt(parser, null,
+                            "allowViaWhitelist", 0) == 1;
                     if (dynamic) {
                         PermissionInfo pi = new PermissionInfo();
                         pi.packageName = sourcePackage.intern();
@@ -2609,6 +2657,7 @@ final class Settings {
                         pi.icon = readInt(parser, null, "icon", 0);
                         pi.nonLocalizedLabel = parser.getAttributeValue(null, "label");
                         pi.protectionLevel = bp.protectionLevel;
+                        pi.allowViaWhitelist = bp.allowViaWhitelist;
                         bp.pendingInfo = pi;
                     }
                     out.put(bp.name, bp);
@@ -3321,6 +3370,57 @@ final class Settings {
             return true;
         }
         return false;
+    }
+
+    void  removeStalePermissions() {
+        /*
+         * Remove any permission that is not currently declared by any package
+         */
+        List<BasePermission> permissionsToRemove = new ArrayList<>();
+        for (BasePermission basePerm : mPermissions.values()) {
+            // Ignore permissions declared by the system
+            if (basePerm.sourcePackage.equals("android") ||
+                    basePerm.sourcePackage.equals("cyanogenmod.platform")) {
+                continue;
+            }
+            // Ignore permissions other than NORMAL (ignore DYNAMIC and BUILTIN), like the
+            // ones based on permission-trees
+            if (basePerm.type != BasePermission.TYPE_NORMAL) {
+                continue;
+            }
+
+            if (!mPackages.containsKey(basePerm.sourcePackage)) {
+                // Package doesn't exist
+                permissionsToRemove.add(basePerm);
+                continue;
+            }
+            PackageSetting pkgSettings = mPackages.get(basePerm.sourcePackage);
+            if (pkgSettings.pkg == null || pkgSettings.pkg.permissions == null) {
+                // Package doesn't declare permissions
+                permissionsToRemove.add(basePerm);
+                continue;
+            }
+            boolean found = false;
+            for (PackageParser.Permission perm : pkgSettings.pkg.permissions) {
+                if (perm.info.name != null && basePerm.name.equals(perm.info.name)) {
+                    // The original package still declares the permission
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                // The original package doesn't currently declare the permission
+                permissionsToRemove.add(basePerm);
+            }
+        }
+        // And now remove all stale permissions
+        for (BasePermission basePerm : permissionsToRemove) {
+            String msg = "Removed stale permission: " + basePerm.name + " originally " +
+                    "assigned to " + basePerm.sourcePackage + "\n";
+            mReadMessages.append(msg);
+            PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+            mPermissions.remove(basePerm.name);
+        }
     }
 
     private List<UserInfo> getAllUsers() {

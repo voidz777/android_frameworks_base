@@ -37,4 +37,12 @@
     <!-- Heads up toast -->
     <string name="heads_up_enabled">Heads-Up Benachrichtigungen sind aktiviert</string>
     <string name="heads_up_disabled">Heads-Up Benachrichtigungen sind deaktiviert</string>
+    
+    <!-- Task Manager -->
+    <string name="task_manager_title">Task-Manager</string>
+    <string name="message_switch_fail">Dieser Task besitzt keine Benutzeroberfläche, wechseln nicht möglich.</string>
+    <string name="tasklist_killall">Alle beenden</string>
+    <string name="tasklist_memory_usage">"Frei/Gesamt Speicher: [<xliff:g id="number">%s</xliff:g>] / [<xliff:g id="name">%s</xliff:g>]"</string>
+    <string name="message_keep_one_launcher">Ein Launcher sollte aktiv bleiben!</string>
+
 </resources>

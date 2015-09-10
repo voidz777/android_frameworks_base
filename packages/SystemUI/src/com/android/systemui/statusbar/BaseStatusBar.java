@@ -28,6 +28,7 @@ import android.app.TaskStackBuilder;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -42,6 +43,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.ThemeConfig;
 import android.database.ContentObserver;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -67,6 +69,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -101,6 +104,8 @@ import com.android.systemui.SearchPanelView;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.cm.SpamMessageProvider;
+import com.android.systemui.slimrecent.RecentController;
+import com.android.systemui.statusbar.AppSidebar;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -241,11 +246,17 @@ public abstract class BaseStatusBar extends SystemUI implements
     private boolean mDeviceProvisioned = false;
 
     private RecentsComponent mRecents;
+    private RecentController mSlimRecents;
+    private boolean mUseSlimRecents = false;
 
     protected int mZenMode;
 
     private ArrayList<String> mDndList;
     private ArrayList<String> mBlacklist;
+    
+    // App sidebar
+    protected AppSidebar mAppSidebar;
+	protected int mSidebarPosition;
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
@@ -334,6 +345,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                     Settings.Secure.SEARCH_PANEL_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
         }
     };
+
+    public RemoteViews.OnClickHandler getOnClickHandler() {
+        return mOnClickHandler;
+    }
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
         @Override
@@ -438,6 +453,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 updateLockscreenNotificationSetting();
 
                 userSwitched(mCurrentUserId);
+
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 updateCurrentProfilesCache();
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
@@ -600,9 +616,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
-        mRecents = getComponent(RecentsComponent.class);
-        mRecents.setCallback(this);
-
         final Configuration currentConfig = mContext.getResources().getConfiguration();
         mLocale = currentConfig.locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
@@ -614,6 +627,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 android.R.interpolator.linear_out_slow_in);
         mFastOutLinearIn = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_linear_in);
+
+        updateRecents();
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
@@ -1139,12 +1154,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             mWindowManager.removeView(mSearchPanelView);
         }
 
-        // Provide SearchPanel with a temporary parent to allow layout params to work.
-        LinearLayout tmpRoot = new LinearLayout(mContext);
-        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                 R.layout.status_bar_search_panel, tmpRoot, false);
-        mSearchPanelView.setOnTouchListener(
-                 new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
+        if (mSearchPanelView == null) {
+            // Provide SearchPanel with a temporary parent to allow layout params to work.
+            LinearLayout tmpRoot = new LinearLayout(mContext);
+            mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
+                    R.layout.status_bar_search_panel, tmpRoot, false);
+            mSearchPanelView.setOnTouchListener(
+                    new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
+        }
         mSearchPanelView.setVisibility(View.GONE);
         boolean vertical = mNavigationBarView != null && mNavigationBarView.isVertical();
         mSearchPanelView.setHorizontal(vertical);
@@ -1185,6 +1202,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         if (mRecents != null) {
             mRecents.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
+        } else if (mSlimRecents != null) {
+            mSlimRecents.hideRecents(triggeredFromHomeKey);
         }
     }
 
@@ -1192,24 +1211,31 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (mRecents != null) {
             sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
             mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+        } else if (mSlimRecents != null) {
+            sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
+            mSlimRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
         }
     }
 
     protected void preloadRecents() {
         if (mRecents != null) {
             mRecents.preloadRecents();
+        } else if (mSlimRecents != null) {
+            mSlimRecents.preloadRecentTasksList();
         }
     }
 
     protected void cancelPreloadingRecents() {
         if (mRecents != null) {
             mRecents.cancelPreloadingRecents();
+        } else if (mSlimRecents != null) {
+            mSlimRecents.cancelPreloadingRecentTasksList();
         }
     }
 
     protected void showRecentsNextAffiliatedTask() {
         if (mRecents != null) {
-            mRecents.showNextAffiliatedTask();
+             mRecents.showNextAffiliatedTask();
         }
     }
 
@@ -1222,6 +1248,27 @@ public abstract class BaseStatusBar extends SystemUI implements
     @Override
     public void onVisibilityChanged(boolean visible) {
         // Do nothing
+    }
+
+    protected void rebuildRecentsScreen() {
+        if (mSlimRecents != null) {
+            mSlimRecents.rebuildRecentsScreen();
+        }
+    }
+
+    protected void updateRecents() {
+        boolean slimRecents = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.USE_SLIM_RECENTS, 0, UserHandle.USER_CURRENT) == 1;
+        if (slimRecents) {
+            mSlimRecents = new RecentController(mContext, mLayoutDirection);
+            mSlimRecents.setCallback(this);
+            mRecents = null;
+        } else {
+            mRecents = getComponent(RecentsComponent.class);
+            mRecents.setCallback(this);
+            mSlimRecents = null;
+        }
+        rebuildRecentsScreen();
     }
 
     public abstract void resetHeadsUpDecayTimer();
@@ -1846,6 +1893,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);
         }
 
+        if (onKeyguard) {
+            hideWeatherPanelIfNecessary(visibleNotifications, getMaxKeyguardNotifications());
+        }
+
         mStackScroller.changeViewPosition(mKeyguardIconOverflowContainer,
                 mStackScroller.getChildCount() - 3);
         mStackScroller.changeViewPosition(mEmptyShadeView, mStackScroller.getChildCount() - 2);
@@ -1874,10 +1925,21 @@ public abstract class BaseStatusBar extends SystemUI implements
         return isKeyguardAllowedForApp;
     }
 
+    private void hideWeatherPanelIfNecessary(int visibleNotifications, int maxKeyguardNotifications) {
+        final ContentResolver resolver = mContext.getContentResolver();
+        int notifications = visibleNotifications;
+        if (mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
+            notifications += 1;
+        }
+        Settings.System.putInt(resolver,
+                Settings.System.LOCK_SCREEN_VISIBLE_NOTIFICATIONS, notifications);
+        maxKeyguardNotifications = getMaxKeyguardNotifications();
+    }
+
     protected void setZenMode(int mode) {
         if (!isDeviceProvisioned()) return;
         mZenMode = mode;
-        updateNotifications();
+        updateNotifications(true);
     }
 
     // extended in PhoneStatusBar
@@ -1899,7 +1961,10 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected abstract void haltTicker();
     protected abstract void setAreThereNotifications();
-    protected abstract void updateNotifications();
+    protected void updateNotifications() {
+        updateNotifications(false);
+    }
+    protected abstract void updateNotifications(boolean immediate);
     protected abstract void tick(StatusBarNotification n, boolean firstTime);
     protected abstract void updateExpandedViewPos(int expandedPosition);
     protected abstract boolean shouldDisableNavbarGestures();
@@ -2338,5 +2403,35 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
         return mStatusBarKeyguardViewManager.isSecure();
+    }
+
+    protected void addSidebarView() {
+        mAppSidebar = (AppSidebar)View.inflate(mContext, R.layout.app_sidebar, null);
+        mWindowManager.addView(mAppSidebar, getAppSidebarLayoutParams(mSidebarPosition));
+    }
+
+    protected void removeSidebarView() {
+        if (mAppSidebar != null)
+            mWindowManager.removeView(mAppSidebar);
+    }
+
+    protected WindowManager.LayoutParams getAppSidebarLayoutParams(int position) {
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
+                0
+                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSLUCENT);
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        lp.gravity = Gravity.TOP;// | Gravity.FILL_VERTICAL;
+        lp.gravity |= position == AppSidebar.SIDEBAR_POSITION_LEFT ? Gravity.LEFT : Gravity.RIGHT;
+        lp.setTitle("AppSidebar");
+
+        return lp;
     }
 }

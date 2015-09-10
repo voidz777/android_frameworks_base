@@ -468,4 +468,8 @@ interface IPackageManager {
     void addPreLaunchCheckPackage(String packageName);
     void removePreLaunchCheckPackage(String packageName);
     void clearPreLaunchCheckPackages();
+
+    /** Protected Apps */
+    void setComponentProtectedSetting(in ComponentName componentName,
+    in boolean newState, int userId);
 }

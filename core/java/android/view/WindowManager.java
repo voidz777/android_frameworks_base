@@ -555,6 +555,14 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_ACCESSIBILITY_OVERLAY = FIRST_SYSTEM_WINDOW+32;
 
         /**
+         * Window type: Recents. Same layer as {@link #TYPE_SYSTEM_DIALOG} but only appears on
+         * one user's screen.
+         * In multiuser systems shows on all users' windows.
+         * @hide
+         */
+        public static final int TYPE_RECENTS_OVERLAY = FIRST_SYSTEM_WINDOW+33;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
@@ -1101,11 +1109,6 @@ public interface WindowManager extends ViewManager {
          */
         public static final int PRIVATE_FLAG_KEYGUARD = 0x00000400;
 
-        /** Window flag: mark layer as fully transparent
-         * {@hide} */
-        public static final int PRIVATE_FLAG_FULLY_TRANSPARENT = 0x10000000;
-
-
         /**
          * {@hide}
          */
@@ -1122,17 +1125,21 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_WAS_NOT_FULLSCREEN = 0x00002000;
 
         /**
-         * Window flag: Overrides default power key behavior
-         * {@hide}
-         */
-        public static final int PRIVATE_FLAG_PREVENT_POWER_KEY = 0x20000000;
-
-        /**
          * Flag that prevents the wallpaper behind the current window from receiving touch events.
          *
          * {@hide}
          */
-        public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 0x00000800;
+        public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 0x00004000;
+
+        /** Window flag: mark layer as fully transparent
+         * {@hide} */
+        public static final int PRIVATE_FLAG_FULLY_TRANSPARENT = 0x10000000;
+
+        /**
+         * Window flag: Overrides default power key behavior
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_PREVENT_POWER_KEY = 0x20000000;
 
         /**
          * Control flags that are private to the platform.

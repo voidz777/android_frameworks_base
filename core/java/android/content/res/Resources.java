@@ -1909,23 +1909,19 @@ public class Resources {
             mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
             int configChanges = calcConfigChanges(config);
-            /* This is ugly, but modifying the activityInfoConfigToNative
-             * adapter would be messier */
-            if ((configChanges & ActivityInfo.CONFIG_THEME_RESOURCE) != 0) {
-                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
-                configChanges |= ActivityInfo.CONFIG_THEME_RESOURCE;
-            } else {
-                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
-            }
 
-            
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
                 mConfiguration.setLayoutDirection(mConfiguration.locale);
             }
             if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {
-                mMetrics.densityDpi = mConfiguration.densityDpi;
-                mMetrics.density = mConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+                if (DisplayMetrics.DENSITY_DEVICE_DEFAULT == mCompatibilityInfo.applicationDensity
+                        && (config != null
+                        && config.densityDpi == DisplayMetrics.DENSITY_DEVICE_DEFAULT)) {
+                    mMetrics.setDensity(DisplayMetrics.DENSITY_PREFERRED);
+                } else {
+                    mMetrics.setDensity(mConfiguration.densityDpi);
+                }
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
 
@@ -1999,7 +1995,15 @@ public class Resources {
                 mTmpConfig.setLayoutDirection(mTmpConfig.locale);
             }
             configChanges = mConfiguration.updateFrom(mTmpConfig);
-            configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
+
+            /* This is ugly, but modifying the activityInfoConfigToNative
+             * adapter would be messier */
+            if ((configChanges & ActivityInfo.CONFIG_THEME_RESOURCE) != 0) {
+                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
+                configChanges |= ActivityInfo.CONFIG_THEME_RESOURCE;
+            } else {
+                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
+            }
         }
         return configChanges;
     }
@@ -2399,7 +2403,7 @@ public class Resources {
             }
             sPreloaded = true;
             mPreloading = true;
-            sPreloadedDensity = DisplayMetrics.DENSITY_DEVICE;
+            sPreloadedDensity = DisplayMetrics.DENSITY_PREFERRED;
             mConfiguration.densityDpi = sPreloadedDensity;
             updateConfiguration(null, null);
         }

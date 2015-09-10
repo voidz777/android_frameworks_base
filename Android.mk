@@ -74,7 +74,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
 	core/java/android/app/IProcessObserver.aidl \
-	core/java/android/app/IProfileManager.aidl \
 	core/java/android/app/ISearchManager.aidl \
 	core/java/android/app/ISearchManagerCallback.aidl \
 	core/java/android/app/IServiceConnection.aidl \
@@ -148,7 +147,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/ICameraServiceListener.aidl \
 	core/java/android/hardware/ICamera.aidl \
 	core/java/android/hardware/ICameraClient.aidl \
-	core/java/android/hardware/ICmHardwareService.aidl \
 	core/java/android/hardware/IConsumerIrService.aidl \
 	core/java/android/hardware/IProCameraUser.aidl \
 	core/java/android/hardware/IProCameraCallbacks.aidl \
@@ -545,12 +543,10 @@ aidl_files := \
 	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/NotificationGroup.aidl \
-	frameworks/base/core/java/android/app/Profile.aidl \
 	frameworks/base/core/java/android/app/WallpaperInfo.aidl \
 	frameworks/base/core/java/android/app/AppOpsManager.aidl \
 	frameworks/base/core/java/android/app/ActivityManager.aidl \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
-	frameworks/base/core/java/android/app/Profile.aidl \
 	frameworks/base/core/java/android/app/AlarmManager.aidl \
 	frameworks/base/core/java/android/app/SearchableInfo.aidl \
 	frameworks/base/core/java/android/app/job/JobParameters.aidl \
@@ -730,6 +726,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/19.txt 19 \
     -since $(SRC_API_DIR)/20.txt 20 \
     -since $(SRC_API_DIR)/21.txt 21 \
+    -since $(SRC_API_DIR)/22.txt 22 \
 		-werror -hide 111 -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -766,7 +763,7 @@ sample_groups := -samplegroup Admin \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=4.4
+framework_docs_SDK_VERSION:=5.1
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
 
@@ -997,6 +994,35 @@ LOCAL_DROIDDOC_OPTIONS:= \
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
 include $(BUILD_DROIDDOC)
+
+# ==== docs for the ndk =======================
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=docs/html-ndk
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+# specify a second html input dir and an output path relative to OUT_DIR)
+LOCAL_ADDITIONAL_HTML_DIR:=docs/html-intl/intl /
+
+LOCAL_MODULE := online-ndk
+
+LOCAL_DROIDDOC_OPTIONS:= \
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-toroot / \
+		-hdf android.whichdoc online \
+		$(sample_groups) \
+		-hdf android.hasSamples true \
+		-samplesdir $(samples_dir)
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-ndk
+
+include $(BUILD_DROIDDOC)
+
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)

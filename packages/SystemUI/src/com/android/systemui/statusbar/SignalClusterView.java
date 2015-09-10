@@ -64,8 +64,6 @@ public class SignalClusterView
 
     private int mWideTypeIconStartPadding;
     private int mSecondaryTelephonyPadding;
-    private int mEndPadding;
-    private int mEndPaddingNothingVisible;
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -305,10 +303,6 @@ public class SignalClusterView
         }
 
         mNoSims.setVisibility(mNoSimsVisible ? View.VISIBLE : View.GONE);
-
-        boolean anythingVisible = mNoSimsVisible || mWifiVisible || mIsAirplaneMode
-                || anyMobileVisible || mVpnVisible;
-        setPaddingRelative(0, 0, anythingVisible ? mEndPadding : mEndPaddingNothingVisible, 0);
     }
 
     private class PhoneState {

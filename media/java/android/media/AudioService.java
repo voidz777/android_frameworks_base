@@ -3367,9 +3367,15 @@ public class AudioService extends IAudioService.Stub {
                     if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
                     return AudioSystem.STREAM_MUSIC;
                 } else {
-                    if (DEBUG_VOL) Log.v(TAG,
-                            "getActiveStreamType: using STREAM_NOTIFICATION as default");
-                    return AudioSystem.STREAM_NOTIFICATION;
+                    if (mVolumeKeysControlRingStream) {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION b/c default");
+                        return AudioSystem.STREAM_NOTIFICATION;
+                    } else {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default");
+                        return AudioSystem.STREAM_MUSIC;
+                    }
                 }
             }
             break;
@@ -4846,7 +4852,9 @@ public class AudioService extends IAudioService.Stub {
     {
         boolean launchPlayer = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.HEADSET_CONNECT_PLAYER, 0, UserHandle.USER_CURRENT) != 0;
-        if (launchPlayer) {
+
+        TelecomManager tm = (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+        if (launchPlayer && !tm.isInCall()) {
             Intent playerIntent = new Intent(Intent.ACTION_MAIN);
             playerIntent.addCategory(Intent.CATEGORY_APP_MUSIC);
             playerIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

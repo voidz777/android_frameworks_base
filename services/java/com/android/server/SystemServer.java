@@ -432,7 +432,6 @@ public final class SystemServer {
         ConsumerIrService consumerIr = null;
         AudioService audioService = null;
         MmsServiceBroker mmsService = null;
-        ProfileManagerService profile = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
@@ -829,16 +828,6 @@ public final class SystemServer {
                 }
             }
 
-            if (!disableNonCoreServices) {
-                try {
-                    Slog.i(TAG, "Profile Manager");
-                    profile = new ProfileManagerService(context);
-                    ServiceManager.addService(Context.PROFILE_SERVICE, profile);
-                } catch (Throwable e) {
-                    reportWtf("Failure starting Profile Manager", e);
-                }
-            }
-
             if (!disableMedia && !"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
                 try {
                     Slog.i(TAG, "Audio Service");
@@ -1031,15 +1020,6 @@ public final class SystemServer {
 
             }
 
-            if (!disableNonCoreServices) {
-                try {
-                    Slog.i(TAG, "CmHardwareService");
-                    ServiceManager.addService(Context.CMHW_SERVICE, new CmHardwareService(context));
-                } catch (Throwable e) {
-                    reportWtf("starting CMHW Service", e);
-                }
-            }
-
             mSystemServiceManager.startService(LauncherAppsService.class);
 
             try {
@@ -1078,6 +1058,16 @@ public final class SystemServer {
 
         // MMS service broker
         mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
+
+        // Externally-defined services
+        for (String service : externalServices) {
+            try {
+                Slog.i(TAG, service);
+                mSystemServiceManager.startService(service);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting " + service , e);
+            }
+        }
 
         // It is now time to start up the app processes...
 
@@ -1144,15 +1134,6 @@ public final class SystemServer {
                 edgeGestureService.systemReady();
             } catch (Throwable e) {
                 reportWtf("making EdgeGesture service ready", e);
-            }
-        }
-
-        for (String service : externalServices) {
-            try {
-                Slog.i(TAG, service);
-                mSystemServiceManager.startService(service);
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting " + service , e);
             }
         }
 
