@@ -239,4 +239,7 @@
 
   <!-- Non-themeable packages -->
   <java-symbol type="array" name="non_themeable_packages" />
+
+  <!-- WiFi turn off notification -->
+  <java-symbol type="string" name="notify_turn_wifi_off_title" />
 </resources>

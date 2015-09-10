@@ -270,4 +270,6 @@
     <string name="permdesc_resetBatteryStats">Allows an application to reset the current low-level
         battery usage data.</string>
 
+    <!-- WiFi turn off notification action text -->
+    <string name="notify_turn_wifi_off_title">Turn Wi-Fi off</string>
 </resources>
