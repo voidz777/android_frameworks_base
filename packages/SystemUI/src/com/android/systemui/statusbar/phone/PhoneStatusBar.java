@@ -4093,6 +4093,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         Resources res = mContext.getResources();
         ImageView image = (ImageView)
                 mHeader.findViewById(R.id.task_manager_button);
+        if (mState == StatusBarState.KEYGUARD) {
+            mTaskManagerButton.setVisibility(View.GONE);
+        }
         if (mShowTaskList && mShowTaskManager) {
             mQSPanel.setVisibility(View.VISIBLE);
             mTaskManagerPanel.setVisibility(View.GONE);
@@ -5462,8 +5465,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    protected void setVisualizerAlpha(float alpha) {
-        mVisualizerView.setAlpha(alpha);
+    public VisualizerView getVisualizer() {
+        return mVisualizerView;
     }
 
     private final class ShadeUpdates {

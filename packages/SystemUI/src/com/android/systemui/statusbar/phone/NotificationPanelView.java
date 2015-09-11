@@ -1452,7 +1452,6 @@ public class NotificationPanelView extends PanelView implements
         Resources res = mContext.getResources();
         ImageView image = (ImageView)
                 mHeader.findViewById(R.id.task_manager_button);
-        boolean expandVisually = mQsExpanded || mStackScrollerOverscrolling;
         if (!mTaskManagerShowing) {
             image.setImageDrawable(res.getDrawable(
                 R.drawable.ic_tasklist_switch_normal));
@@ -1693,7 +1692,7 @@ public class NotificationPanelView extends PanelView implements
                 * mKeyguardStatusBarAnimateAlpha);
         float alphaBottomArea = Math.min(1 - getQsExpansionFraction(), alphaNotifications);
         mKeyguardBottomArea.setAlpha(alphaBottomArea);
-        mStatusBar.setVisualizerAlpha(alphaBottomArea);
+        mStatusBar.getVisualizer().setAlpha(alphaBottomArea);
         setQsTranslation(mQsExpansionHeight);
     }
 
