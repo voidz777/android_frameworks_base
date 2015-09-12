@@ -256,7 +256,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     
     // App sidebar
     protected AppSidebar mAppSidebar;
-	protected int mSidebarPosition;
+    protected int mSidebarPosition;
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
