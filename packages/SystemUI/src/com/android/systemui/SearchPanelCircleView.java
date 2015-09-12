@@ -392,7 +392,7 @@ public class SearchPanelCircleView extends FrameLayout {
         float circleSize = useStaticSize ? mCircleMinSize : mRightCircleSize;
         if (mHorizontal) {
             if (mLeftNavbar) {
-                left = (int) (circleSize / 2);
+                left = (int) (mBaseMargin + offset - circleSize / 2);
             } else {
                 left = (int) (getWidth() - circleSize / 2 - offset - 100);
             }
@@ -400,8 +400,8 @@ public class SearchPanelCircleView extends FrameLayout {
             top = (int) ((top / 2) - (circleSize / 2) + 65);
         } else {
             left = (int) ((getWidth() / 4) - ((3 * circleSize) / 4) + 65);
-            left = (int) (getWidth() - left - circleSize);
-            top = (int) (getHeight() - circleSize / 2 - offset - 100);
+            left = (int) (getWidth() - left - circleSize); /*-50*/
+            top = (int) (getHeight() - circleSize / 2 - offset - 100); /*-40*/
         }
         mCircleRectRight.set(left, top, (int) (left + circleSize), (int) (top + circleSize));
     }
@@ -411,7 +411,7 @@ public class SearchPanelCircleView extends FrameLayout {
         float circleSize = useStaticSize ? mCircleMinSize : mLeftCircleSize;
         if (mHorizontal) {
             if (mLeftNavbar) {
-                left = (int) (circleSize / 2);
+                left = (int) (mBaseMargin + offset - circleSize / 2);
             } else {
                 left = (int) (getWidth() - circleSize / 2 - offset - 100);
             }
@@ -419,8 +419,8 @@ public class SearchPanelCircleView extends FrameLayout {
             top = (int) (getHeight() - top - circleSize - 80);
         } else {
             left = (int) (getWidth() - circleSize) / 2;
-            left = (int) ((left / 2) - (circleSize / 2) + 65);
-            top = (int) (getHeight() - circleSize / 2 - offset - 100);
+            left = (int) ((left / 2) - (circleSize / 2) + 65);/*+50*/
+            top = (int) (getHeight() - circleSize / 2 - offset - 100);/*-40*/
         }
         mCircleRectLeft.set(left, top, (int) (left + circleSize), (int) (top + circleSize));
     }
@@ -430,7 +430,7 @@ public class SearchPanelCircleView extends FrameLayout {
         float circleSize = useStaticSize ? mCircleMinSize : mRightCircleSize1;
         if (mHorizontal) {
             if (mLeftNavbar) {
-                left = (int) (circleSize / 2);
+                left = (int) (mBaseMargin + offset - circleSize);
             } else {
                 left = (int) (getWidth() - circleSize / 2 - offset - 30);
             }
@@ -449,7 +449,7 @@ public class SearchPanelCircleView extends FrameLayout {
         float circleSize = useStaticSize ? mCircleMinSize : mLeftCircleSize1;
         if (mHorizontal) {
             if (mLeftNavbar) {
-                left = (int) (circleSize / 2);
+                left = (int) (mBaseMargin + offset - circleSize);
             } else {
                 left = (int) (getWidth() - circleSize / 2 - offset - 30);
             }
@@ -468,7 +468,7 @@ public class SearchPanelCircleView extends FrameLayout {
         float circleSize = useStaticSize ? mCircleMinSize : mCircleSize;
         if (mHorizontal) {
             if (mLeftNavbar) {
-                left = (int) (mBaseMargin + offset - circleSize / 2);
+                left = (int) (mBaseMargin + offset);
             } else {
                 left = (int) (getWidth() - circleSize / 2 - mBaseMargin - offset);
             }
