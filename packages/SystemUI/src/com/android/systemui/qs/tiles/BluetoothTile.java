@@ -196,6 +196,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         public void setToggleState(boolean state) {
             mController.setBluetoothEnabled(state);
             fireToggleStateChanged(state);
+            setItemsVisible(state);
         }
 
         @Override
