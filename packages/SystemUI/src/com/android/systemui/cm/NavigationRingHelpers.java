@@ -37,7 +37,7 @@ import java.net.URISyntaxException;
 import static com.android.internal.util.cm.NavigationRingConstants.*;
 
 public class NavigationRingHelpers {
-    public static final int MAX_ACTIONS = 5;
+    public static final int MAX_ACTIONS = 3;
 
     private NavigationRingHelpers() {
         // Do nothing here
@@ -86,10 +86,6 @@ public class NavigationRingHelpers {
         CMSettings.Secure.putStringForUser(cr, CMSettings.Secure.NAVIGATION_RING_TARGETS[1],
                 ACTION_ASSIST, UserHandle.USER_CURRENT);
         CMSettings.Secure.putStringForUser(cr, CMSettings.Secure.NAVIGATION_RING_TARGETS[2], null,
-                UserHandle.USER_CURRENT);
-        Settings.Secure.putStringForUser(cr, Settings.Secure.NAVIGATION_RING_TARGETS[3], null,
-                UserHandle.USER_CURRENT);
-        Settings.Secure.putStringForUser(cr, Settings.Secure.NAVIGATION_RING_TARGETS[4], null,
                 UserHandle.USER_CURRENT);
     }
 
