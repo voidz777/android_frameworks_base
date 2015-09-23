@@ -140,14 +140,18 @@ public final class BatteryStatsHelper {
     }
 
     public void storeStatsHistoryInFile(String fname) {
+        internalStoreStatsHistoryInFile(getStats(), fname);
+    }
+
+    public void internalStoreStatsHistoryInFile(BatteryStats stats, String fname) {
         synchronized (sFileXfer) {
             File path = makeFilePath(mContext, fname);
-            sFileXfer.put(path, this.getStats());
+            sFileXfer.put(path, stats);
             FileOutputStream fout = null;
             try {
                 fout = new FileOutputStream(path);
                 Parcel hist = Parcel.obtain();
-                getStats().writeToParcelWithoutUids(hist, 0);
+                stats.writeToParcelWithoutUids(hist, 0);
                 byte[] histData = hist.marshall();
                 fout.write(histData);
             } catch (IOException e) {
@@ -206,16 +210,26 @@ public final class BatteryStatsHelper {
         mStats = null;
     }
 
+    private void clearAllStats() {
+        clearStats();
+        sStatsXfer = null;
+        sBatteryBroadcastXfer = null;
+        for (File f : sFileXfer.keySet()) {
+            f.delete();
+        }
+        sFileXfer.clear();
+     }
+
     public BatteryStats getStats() {
         if (mStats == null) {
-            load();
+            loadStats();
         }
         return mStats;
     }
 
     public Intent getBatteryBroadcast() {
         if (mBatteryBroadcast == null && mCollectBatteryBroadcast) {
-            load();
+            loadStats();
         }
         return mBatteryBroadcast;
     }
@@ -961,7 +975,7 @@ public final class BatteryStatsHelper {
         }
     }
 
-    private void load() {
+    private void loadStats() {
         if (mBatteryInfo == null) {
             return;
         }
@@ -969,6 +983,15 @@ public final class BatteryStatsHelper {
         if (mCollectBatteryBroadcast) {
             mBatteryBroadcast = mContext.registerReceiver(null,
                     new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        }
+    }
+
+    public void resetStatistics() {
+        try {
+            clearAllStats();
+            mBatteryInfo.resetStatistics();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException:", e);
         }
     }
 
