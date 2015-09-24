@@ -1883,11 +1883,13 @@
          "bugreport" = Take bug report, if available
          "silent" = silent mode
          "users" = list of users
+	 "on-the-go" = On The Go
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>power</item>
         <item>bugreport</item>
         <item>users</item>
+        <item>onthego</item>
     </string-array>
 
     <!-- default telephony hardware configuration for this platform.
