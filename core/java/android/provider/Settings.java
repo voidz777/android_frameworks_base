@@ -2169,8 +2169,10 @@ public final class Settings {
         /**
          * Quick Settings Quick Pulldown
          * 0 = off, 1 = right, 2 = left
+         * @deprecated Use {@link cyanogenmod.providers.CMSettings.System#QS_QUICK_PULLDOWN} instead
          * @hide
          */
+        @Deprecated
         public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
 
         /**
@@ -6284,8 +6286,10 @@ public final class Settings {
          *
          * ex: mods_icons|mods_overlays|mods_homescreen
          *
+         * @deprecated Use {@link cyanogenmod.providers.CMSettings.Secure#DEFAULT_THEME_COMPONENTS}
          * @hide
          */
+        @Deprecated
         public static final String DEFAULT_THEME_COMPONENTS = "default_theme_components";
 
         /**
@@ -6328,8 +6332,10 @@ public final class Settings {
 
         /**
          * Whether to show the brightness slider in quick settings panel.
+         * @deprecated Use {@link cyanogenmod.providers.CMSettings.Secure#QS_SHOW_BRIGHTNESS_SLIDER}
          * @hide
          */
+        @Deprecated
         public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
 
         /**
@@ -6341,8 +6347,10 @@ public final class Settings {
         /**
          * Use "main" tiles on the first row of the quick settings panel
          * 0 = no, 1 = yes
+         * @deprecated Use {@link cyanogenmod.providers.CMSettings.Secure#QS_USE_MAIN_TILES}
          * @hide
          */
+        @Deprecated
         public static final String QS_USE_MAIN_TILES = "sysui_qs_main_tiles";
 
         /**
@@ -6359,8 +6367,10 @@ public final class Settings {
 
         /**
          * Custom navring actions
+         * @deprecated Use {@link cyanogenmod.providers.CMSettings.Secure#NAVIGATION_RING_TARGETS}
          * @hide
          */
+        @Deprecated
         public static final String[] NAVIGATION_RING_TARGETS = new String[] {
                 "navigation_ring_targets_0",
                 "navigation_ring_targets_1",
@@ -6412,8 +6422,10 @@ public final class Settings {
         /**
          * Whether to enable "advanced mode" for the current user.
          * Boolean setting. 0 = no, 1 = yes.
+         * @deprecated Use {@link cyanogenmod.providers.CMSettings.Secure#ADVANCED_MODE}
          * @hide
          */
+        @Deprecated
         public static final String ADVANCED_MODE = "advanced_mode";
 
         /**
