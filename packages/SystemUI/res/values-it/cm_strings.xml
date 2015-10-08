@@ -115,6 +115,7 @@
   <string name="quick_settings_lockscreen_label_enforced">Schermata di blocco forzata</string>
   <string name="quick_settings_network_adb_label">ADB attraverso la rete</string>
   <string name="quick_settings_lte_label">LTE</string>
+  <string name="quick_settings_volume_panel_label">Pannello volume</string>
   <string name="quick_settings_screen_timeout_detail_title">Sospensione schermo</string>
   <string name="quick_settings_usb_tether_label">Tethering USB</string>
   <string name="quick_settings_heads_up_label">Heads Up</string>
@@ -135,7 +136,7 @@
   <string name="navbar_menu_big_button">Pulsante Menu</string>
   <string name="navigation_ring_title">Scorciatoie avvio rapido</string>
   <string name="navring_target_reset_message">Eliminare tutte le scorciatoie della barra di navigazione create e ripristinare quelle predefinite?</string>
-  <string name="navring_target_reset">Scorciatoie della barra di navigazione ripristinate</string>
+  <string name="navring_target_reset">Scorciatoie della barra di navigazione reimpostate</string>
   <string name="navring_action_open_ime_switcher">Apri selettore di immissione testo</string>
   <string name="navring_action_kill_app">Termina app</string>
   <string name="navring_action_none">Nessuno</string>

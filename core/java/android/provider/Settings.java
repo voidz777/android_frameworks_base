@@ -1234,6 +1234,7 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_ENABLED);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_VISIBLE);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+            MOVED_TO_SECURE.add(Secure.LOCK_PASS_TO_SECURITY_VIEW);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_SIZE);
             MOVED_TO_SECURE.add(Secure.LOCK_DOTS_VISIBLE);
             MOVED_TO_SECURE.add(Secure.LOCK_SHOW_ERROR_PATH);
@@ -2564,43 +2565,6 @@ public final class Settings {
         public static final String TIME_12_24 = "time_12_24";
 
         /**
-         * Whether to dim the navigation bar icons after inactivity
-         * @hide
-         */
-        public static final String DIM_NAV_BUTTONS = "dim_nav_buttons";
-
-        /**
-         * Time in milliseconds to wait before dimming the nav buttons
-         * @hide
-         */
-        public static final String DIM_NAV_BUTTONS_TIMEOUT = "dim_nav_buttons_timeout";
-
-        /**
-         * Alpha value percentage to dim the nav buttons to
-         * @hide
-         */
-        public static final String DIM_NAV_BUTTONS_ALPHA = "dim_nav_buttons_alpha";
-
-        /**
-         * Whether to animate the nav button dimming
-         * @hide
-         */
-        public static final String DIM_NAV_BUTTONS_ANIMATE = "dim_nav_buttons_animate";
-
-        /**
-         * Duration of the fade animation in milliseconds
-         * @hide
-         */
-        public static final String DIM_NAV_BUTTONS_ANIMATE_DURATION = "dim_nav_buttons_animate_duration";
-
-         /**
-         * Whether to listen on the entire screen for touches to un-dim
-         * the buttons instead of just listening on the navbar
-         * @hide
-         */
-        public static final String DIM_NAV_BUTTONS_TOUCH_ANYWHERE = "dim_nav_buttons_touch_anywhere";
-
-        /**
          * Date format string
          *   mm/dd/yyyy
          *   dd/mm/yyyy
@@ -3335,6 +3299,15 @@ public final class Settings {
         public static final String NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD = "network_traffic_autohide_threshold";
 
         /**
+         * Network traffic indicator placement (default is 0)
+         * 0 - Show in status bar
+         * 1 - Show in expanded header
+         * 2 - Show in status bar and expanded header
+         * @hide
+         */
+        public static final String SHOW_STATUS_BAR_NETWORK_TRAFFIC = "show_statusbar_network_traffic";
+
+        /**
          * Whether to vibrate when quick settings tile is pressed.
          *
          * @hide
@@ -3790,6 +3763,20 @@ public final class Settings {
         public static final String LOCK_SCREEN_VISIBLE_NOTIFICATIONS = "lock_screen_visible_notifications";
 
         /**
+         * Allows to show the background activity back the lockscreen
+         * 0 = off
+         * 1 = on
+         * @hide
+         */
+        public static final String LOCKSCREEN_SEE_THROUGH = "lockscreen_see_through";
+
+        /**
+         * Allows setting the radius for lockscreen blur
+         * @hide
+         */
+        public static final String LOCKSCREEN_BLUR_RADIUS = "lockscreen_blur_radius";
+
+        /**
          * Whether to use slim recents
          * @hide
          */
@@ -3919,6 +3906,12 @@ public final class Settings {
          * @hide
          */
         public static final String APP_SIDEBAR_SHOW_TRIGGER = "app_sidebar_show_trigger";
+
+        /**
+         * Show when WiFi or data mobile is sending/receiving data
+         * @hide
+         */
+        public static final String STATUS_BAR_NETWORK_ACTIVITY = "status_bar_network_activity";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4308,6 +4301,7 @@ public final class Settings {
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_ENABLED);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_VISIBLE);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+            MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PASS_TO_SECURITY_VIEW);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_SIZE);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_DOTS_VISIBLE);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_SHOW_ERROR_PATH);
@@ -5080,6 +5074,12 @@ public final class Settings {
         @Deprecated
         public static final String
                 LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED = "lock_pattern_tactile_feedback_enabled";
+
+        /**
+         * Whether keyguard will direct show security view (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String LOCK_PASS_TO_SECURITY_VIEW = "lock_screen_pass_to_security_view";
 
         /**
          * Determines the width and height of the LockPatternView widget

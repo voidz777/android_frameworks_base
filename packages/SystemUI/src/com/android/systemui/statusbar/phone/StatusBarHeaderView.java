@@ -137,6 +137,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private boolean mShowTaskManager;
     private View mTaskManagerButton;
 
+    // Network traffic
+    private View mNetworkTraffic;
+    private TextView mNetworkTrafficText;
+
     /**
      * In collapsed QS, the clock and avatar are scaled down a bit post-layout to allow for a nice
      * transition. These values determine that factor.
@@ -145,7 +149,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private float mAvatarCollapsedScaleFactor;
 
     private ActivityStarter mActivityStarter;
-    private BatteryController mBatteryController;
     private NextAlarmController mNextAlarmController;
     private WeatherController mWeatherController;
     private QSPanel mQSPanel;
@@ -169,6 +172,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private ImageView mBackgroundImage;
     private Drawable mCurrentBackground;
     private float mLastHeight;
+
+    private UserInfoController mUserInfoController;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -218,6 +223,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mWeatherContainer.setOnLongClickListener(this);
         mWeatherLine1 = (TextView) findViewById(R.id.weather_line_1);
         mWeatherLine2 = (TextView) findViewById(R.id.weather_line_2);
+        mNetworkTraffic = findViewById(R.id.networkTraffic_container);
+        mNetworkTraffic.setOnClickListener(this);
+        mNetworkTraffic.setOnLongClickListener(this);
+        mNetworkTrafficText = (TextView) findViewById(R.id.networkTraffic);
         mSettingsObserver = new SettingsObserver(new Handler());
         mBackgroundImage = (ImageView) findViewById(R.id.background_image);
         loadDimens();
@@ -236,6 +245,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 boolean rtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
                 mTime.setPivotX(rtl ? mTime.getWidth() : 0);
                 mTime.setPivotY(mTime.getBaseline());
+                mNetworkTrafficText.setPivotX(rtl ? mNetworkTrafficText.getWidth() : 0);
+                mNetworkTrafficText.setPivotY(mNetworkTrafficText.getBaseline());
                 updateAmPmTranslation();
             }
         });
@@ -285,6 +296,18 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateClockCollapsedMargin();
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        setListening(false);
+        setQSPanel(null);
+        if (mUserInfoController != null) {
+            mUserInfoController.removeListener(mUserInfoChangedListener);
+            mUserInfoController = null;
+        }
+        getOverlay().clear();
+    }
+
     private void updateClockCollapsedMargin() {
         Resources res = getResources();
         int padding = res.getDimensionPixelSize(R.dimen.clock_collapsed_bottom_margin);
@@ -332,9 +355,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void setBatteryController(BatteryController batteryController) {
-        mBatteryController = batteryController;
-        ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
-        mBatteryLevel.setBatteryController(batteryController);
+        BatteryMeterView v = ((BatteryMeterView) findViewById(R.id.battery));
+        v.setBatteryStateRegistar(batteryController);
+        v.setBatteryController(batteryController);
+        mBatteryLevel.setBatteryStateRegistar(batteryController);
     }
 
     public void setNextAlarmController(NextAlarmController nextAlarmController) {
@@ -596,13 +620,17 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         invalidateOutline();
     }
 
+    private UserInfoController.OnUserInfoChangedListener mUserInfoChangedListener =
+            new UserInfoController.OnUserInfoChangedListener() {
+                @Override
+                public void onUserInfoChanged(String name, Drawable picture) {
+                    mMultiUserAvatar.setImageDrawable(picture);
+                }
+            };
+
     public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addListener(new UserInfoController.OnUserInfoChangedListener() {
-            @Override
-            public void onUserInfoChanged(String name, Drawable picture) {
-                mMultiUserAvatar.setImageDrawable(picture);
-            }
-        });
+        mUserInfoController = userInfoController;
+        userInfoController.addListener(mUserInfoChangedListener);
     }
 
     @Override
@@ -625,6 +653,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         } else if (v == mHeadsUpButton) {
             startHeadsUpActivity();
             updateHeadsUpButton();
+        } else if (v == mNetworkTraffic) {
+            startNetworkTrafficActivity();
         }
         mQSPanel.vibrateTile(20);
     }
@@ -645,6 +675,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             startHeadsUpLongClickActivity();
         } else if (v == mTaskManagerButton) {
             startTaskManagerLongClickActivity();
+        } else if (v == mNetworkTraffic) {
+            startNetworkTrafficLongClickActivity();
         }
         mQSPanel.vibrateTile(20);
         return false;
@@ -745,7 +777,28 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mActivityStarter.startActivity(intent, true /* dismissShade */);
     }
 
+    private void startNetworkTrafficActivity() {
+        int state = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.NETWORK_TRAFFIC_STATE, 0);
+        state++;
+        if (state >= 4) {
+            state = 1;
+        }
+        Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.NETWORK_TRAFFIC_STATE, state);
+    }
+
+    private void startNetworkTrafficLongClickActivity() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setClassName("com.android.settings",
+            "com.android.settings.Settings$NetworkTrafficSettingsActivity");
+        mActivityStarter.startActivity(intent, true /* dismissShade */);
+    }
+
     public void setQSPanel(QSPanel qsp) {
+        if (qsp == null && mQSPanel != null) {
+            mQSPanel.setCallback(null);
+        }
         mQSPanel = qsp;
         if (mQSPanel != null) {
             mQSPanel.setCallback(mQsPanelCallback);
@@ -787,6 +840,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         target.avatarX = mMultiUserSwitch.getLeft() + mMultiUserAvatar.getLeft();
         target.avatarY = mMultiUserSwitch.getTop() + mMultiUserAvatar.getTop();
         target.weatherY = mClock.getBottom() - mWeatherLine1.getHeight();
+        target.networkTrafficScale = mExpanded ? 1f : 0f;
         if (getLayoutDirection() == LAYOUT_DIRECTION_LTR) {
             target.batteryX = mSystemIconsSuperContainer.getLeft()
                     + mSystemIconsContainer.getRight();
@@ -847,6 +901,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mMultiUserAvatar.setScaleY(values.avatarScale);
         mMultiUserAvatar.setX(values.avatarX - mMultiUserSwitch.getLeft());
         mMultiUserAvatar.setY(values.avatarY - mMultiUserSwitch.getTop());
+        mNetworkTrafficText.setScaleX(values.networkTrafficScale);
+        mNetworkTrafficText.setScaleY(values.networkTrafficScale);
         if (getLayoutDirection() == LAYOUT_DIRECTION_LTR) {
             mSystemIconsSuperContainer.setX(values.batteryX - mSystemIconsContainer.getRight());
         } else {
@@ -896,6 +952,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         if (!mExpanded) {
             mTime.setScaleX(1f);
             mTime.setScaleY(1f);
+            mNetworkTrafficText.setScaleX(1f);
+            mNetworkTrafficText.setScaleY(1f);
         }
         updateAmPmTranslation();
     }
@@ -929,6 +987,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         float signalClusterAlpha;
         float settingsRotation;
         float weatherY;
+        float networkTrafficScale = 1f;
 
         public void interpoloate(LayoutValues v1, LayoutValues v2, float t) {
             timeScale = v1.timeScale * (1 - t) + v2.timeScale * t;
@@ -939,6 +998,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             avatarY = v1.avatarY * (1 - t) + v2.avatarY * t;
             batteryX = v1.batteryX * (1 - t) + v2.batteryX * t;
             batteryY = v1.batteryY * (1 - t) + v2.batteryY * t;
+            networkTrafficScale = v1.networkTrafficScale * (1 - t) + v2.networkTrafficScale * t;
             headsUpTranslation =
                     v1.headsUpTranslation * (1 - t) + v2.headsUpTranslation * t;
             taskManagerTranslation =

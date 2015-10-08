@@ -114,4 +114,7 @@ interface IBatteryStats {
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
+
+    /** @hide **/
+    void resetStatistics();
 }

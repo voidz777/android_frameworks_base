@@ -68,6 +68,7 @@ public class QSPanel extends ViewGroup {
     private final TextView mDetailSettingsButton;
     private final TextView mDetailDoneButton;
     private final View mBrightnessView;
+    private final ImageView mBrightnessIcon;
     private final QSDetailClipper mClipper;
     private final H mHandler = new H();
 
@@ -133,6 +134,8 @@ public class QSPanel extends ViewGroup {
         mDetail.setClickable(true);
         mBrightnessView = LayoutInflater.from(context).inflate(
                 R.layout.quick_settings_brightness_dialog, this, false);
+        // enable the brightness icon
+        mBrightnessIcon = (ImageView) mBrightnessView.findViewById(R.id.brightness_icon);
         mFooter = new QSFooter(this, context);
         addView(mDetail);
         addView(mBrightnessView);
@@ -143,7 +146,7 @@ public class QSPanel extends ViewGroup {
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
-                (ImageView) findViewById(R.id.brightness_icon),
+                mBrightnessIcon,
                 (ToggleSlider) findViewById(R.id.brightness_slider));
 
         mDetailDoneButton.setOnClickListener(new OnClickListener() {
@@ -163,9 +166,11 @@ public class QSPanel extends ViewGroup {
         if (mBrightnessSliderEnabled) {
             mBrightnessView.setVisibility(VISIBLE);
             brightnessSlider.setVisibility(VISIBLE);
+            mBrightnessIcon.setVisibility(View.VISIBLE);
         } else {
             mBrightnessView.setVisibility(GONE);
             brightnessSlider.setVisibility(GONE);
+            mBrightnessIcon.setVisibility(View.GONE);
         }
         updateResources();
         return mBrightnessSliderEnabled;
@@ -272,6 +277,15 @@ public class QSPanel extends ViewGroup {
             }
         }
         mFooter.onConfigurationChanged();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mHost != null) {
+            mHost.getKeyguardMonitor().removeCallback(mKeyguardListener);
+        }
+        mBrightnessController.unregisterCallbacks();
     }
 
     public void setExpanded(boolean expanded) {

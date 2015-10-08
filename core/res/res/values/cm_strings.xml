@@ -262,4 +262,20 @@
     <string name="quick_settings_tile_flashlight_not_title">Flashlight is on</string>
     <string name="quick_settings_tile_flashlight_not_summary">Tap to turn off</string>
 
+    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose
+         whether they want to allow the application to do this. -->
+    <string name="permlab_resetBatteryStats">reset battery statistics</string>
+    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose
+         whether they want to allow the application to do this. -->
+    <string name="permdesc_resetBatteryStats">Allows an application to reset the current low-level
+        battery usage data.</string>
+
+    <!-- WiFi turn off notification action text -->
+    <string name="notify_turn_wifi_off_title">Turn Wi-Fi off</string>
+
+    <!-- Third party keyguard permission label -->
+    <string name="permlab_thirdPartyKeyguard">third party lock screen</string>
+    <!-- Third party keyguard permission description -->
+    <string name="permdesc_thirdPartyKeyguard">Allows an app to be used as an insecure lock screen.</string>
+
 </resources>

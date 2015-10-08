@@ -2151,8 +2151,7 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
 
-                    // Only check for spam if this is a new notification
-                    if (old == null && isNotificationSpam(notification, pkg)) {
+                    if (isNotificationSpam(notification, pkg)) {
                         mArchive.record(r.sbn);
                         return;
                     }
@@ -3163,7 +3162,7 @@ public class NotificationManagerService extends SystemService {
             enableLed = false;
         } else if (isLedNotificationForcedOn(ledNotification)) {
             enableLed = true;
-        } else if (!mScreenOnEnabled && (mInCall || mScreenOn)) {
+        } else if (mInCall || (mScreenOn && !mScreenOnEnabled)) {
             enableLed = false;
         } else {
             enableLed = true;

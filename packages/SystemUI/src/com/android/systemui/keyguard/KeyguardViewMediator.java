@@ -26,6 +26,7 @@ import android.app.SearchManager;
 import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -34,8 +35,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -49,6 +52,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -149,6 +153,8 @@ public class KeyguardViewMediator extends SystemUI {
 
     private static final String SETTINGS_PACKAGE = "com.android.settings";
     private static final String CRYPT_KEEPER_ACTIVITY = SETTINGS_PACKAGE + ".CryptKeeper";
+
+    private static final String DECRYPT_STATE = "trigger_restart_framework";
 
     // used for handler messages
     private static final int SHOW = 2;
@@ -333,7 +339,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     private final ArrayList<IKeyguardStateCallback> mKeyguardStateCallbacks = new ArrayList<>();
 
-    private int mCyrptKeeperEnabledState = -1;
+    private boolean mCryptKeeperEnabled = true;
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -793,6 +799,15 @@ public class KeyguardViewMediator extends SystemUI {
             if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled internally");
             return true;
         }
+        if (mLockPatternUtils.isThirdPartyKeyguardEnabled()) {
+            // We don't want the stock keyguard to do anything when a third party component is
+            // enabled.  The view mediator will still show take care of showing the third party
+            // component as usual.
+            if (DEBUG) {
+                Log.d(TAG, "iisKeyguardDisabled: keyguard is disabled by third party keyguard");
+            }
+            return true;
+        }
         if (mLockPatternUtils.isLockScreenDisabled()) {
             if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled by setting");
             return true;
@@ -808,13 +823,14 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private boolean isCryptKeeperEnabled() {
-        if (mCyrptKeeperEnabledState == -1) {
-            PackageManager pm = mContext.getPackageManager();
-            mCyrptKeeperEnabledState = pm.getComponentEnabledSetting(
-                    new ComponentName(SETTINGS_PACKAGE, CRYPT_KEEPER_ACTIVITY));
+        if (!mCryptKeeperEnabled) {
+            // once it's disabled, it's disabled.
+            return false;
         }
-
-        return mCyrptKeeperEnabledState != PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        final String state = SystemProperties.get("vold.decrypt");
+        mCryptKeeperEnabled = !"".equals(state) && !DECRYPT_STATE.equals(state);
+        if (DEBUG) Log.w(TAG, "updated crypt keeper state to: " + mCryptKeeperEnabled);
+        return mCryptKeeperEnabled;
     }
 
     public boolean isKeyguardBound() {
@@ -1102,6 +1118,7 @@ public class KeyguardViewMediator extends SystemUI {
             updateActivityLockScreenState();
             adjustStatusBarLocked();
             userActivity();
+            if (isThirdPartyKeyguardEnabled()) showThirdPartyKeyguard(false);
             return;
         }
 
@@ -1591,7 +1608,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleReset() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleReset");
-            mStatusBarKeyguardViewManager.reset();
+            mStatusBarKeyguardViewManager.reset(false);
         }
     }
 
@@ -1615,7 +1632,37 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleNotifyScreenOff() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenOff");
+            if (isThirdPartyKeyguardEnabled()) {
+                showThirdPartyKeyguard(true);
+            }
             mStatusBarKeyguardViewManager.onScreenTurnedOff();
+        }
+    }
+
+    /**
+     * @return Whether a third party keyguard is enabled
+     */
+    private boolean isThirdPartyKeyguardEnabled() {
+        return mLockPatternUtils.isThirdPartyKeyguardEnabled();
+    }
+
+    /**
+     * Launches the third party keyguard activity as specified by
+     * {@link LockPatternUtils#getThirdPartyKeyguardComponent()}
+     */
+    private void showThirdPartyKeyguard(boolean playSounds) {
+        ComponentName thirdPartyKeyguardComponent =
+                mLockPatternUtils.getThirdPartyKeyguardComponent();
+        if (thirdPartyKeyguardComponent != null) {
+            Intent intent = new Intent();
+            intent.setComponent(thirdPartyKeyguardComponent);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                mContext.startActivity(intent);
+                if (playSounds) playSounds(true);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "Unable to start third party keyguard: " + thirdPartyKeyguardComponent);
+            }
         }
     }
 
@@ -1703,5 +1750,9 @@ public class KeyguardViewMediator extends SystemUI {
                 Slog.w(TAG, "Failed to call onShowingStateChanged or onSimSecureStateChanged", e);
             }
         }
+    }
+
+    public void setBackgroundBitmap(Bitmap bmp) {
+        mStatusBarKeyguardViewManager.setBackgroundBitmap(bmp);
     }
 }
