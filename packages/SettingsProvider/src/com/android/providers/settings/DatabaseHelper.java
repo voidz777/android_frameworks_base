@@ -89,6 +89,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
 
+    private String mPublicSrcDir;
+
     static {
         mValidTables.add(TABLE_SYSTEM);
         mValidTables.add(TABLE_SECURE);
@@ -119,6 +121,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super(context, dbNameForUser(userHandle), null, DATABASE_VERSION);
         mContext = context;
         mUserHandle = userHandle;
+        try {
+            String packageName = mContext.getPackageName();
+            mPublicSrcDir = mContext.getPackageManager().getApplicationInfo(packageName, 0)
+                    .publicSourceDir;
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public static boolean isValidTable(String name) {
@@ -2888,7 +2897,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Resources customResources = null;
         if (!TextUtils.isEmpty(mcc)) {
             tempConfiguration.mcc = Integer.parseInt(mcc);
-            customResources = new Resources(new AssetManager(), new DisplayMetrics(),
+            AssetManager assetManager = new AssetManager();
+            assetManager.addAssetPath(mPublicSrcDir);
+            customResources = new Resources(assetManager, new DisplayMetrics(),
                     tempConfiguration);
         }
         loadSetting(stmt, key, customResources == null ? mContext.getResources().getString(resid)

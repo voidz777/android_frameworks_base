@@ -245,4 +245,7 @@
 
   <!-- Region locked prebundled packages -->
   <java-symbol type="array" name="config_region_locked_packages" />
+
+  <!-- Packages in this list should be a union of all packages defined in values-mccxxx (mcc) -->
+  <java-symbol type="array" name="config_restrict_to_region_locked_devices" />
 </resources>
