@@ -67,29 +67,58 @@
                 android:id="@+id/lights_out"
                 android:visibility="gone">
                 <ImageView
-                    android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
+                    android:layout_width="@dimen/navigation_key_width"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_lights_out_dot_large"
                     android:scaleType="center"
+                    android:layout_weight="2"
                     />
                 <ImageView
-                    android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
+                    android:layout_width="@dimen/navigation_key_width"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_lights_out_dot_large"
                     android:scaleType="center"
+                    android:layout_weight="1"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:visibility="invisible"
                     />
                 <ImageView
-                    android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
+                    android:layout_width="@dimen/navigation_key_width"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_lights_out_dot_large"
                     android:scaleType="center"
+                    android:layout_weight="1"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:visibility="invisible"
+                    android:layout_weight="1"
+                />
+                <ImageView
+                    android:layout_width="@dimen/navigation_key_width"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_sysbar_lights_out_dot_large"
+                    android:scaleType="center"
+                    android:layout_weight="1"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:visibility="invisible"
                     />
                 <ImageView
-                    android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
+                    android:layout_width="@dimen/navigation_key_width"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_lights_out_dot_large"
                     android:scaleType="center"
-                    />
+                    android:layout_weight="2"
+                />
             </LinearLayout>
             <View
                 android:layout_width="0dp"
@@ -163,25 +192,55 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_lights_out_dot_large"
                     android:scaleType="center"
+                    android:layout_weight="2"
                     />
                 <ImageView
                     android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_lights_out_dot_large"
                     android:scaleType="center"
+                    android:layout_weight="1"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:visibility="invisible"
+                    />
+
+                <ImageView
+                    android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_sysbar_lights_out_dot_large"
+                    android:scaleType="center"
+                    android:layout_weight="1"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:visibility="invisible"
+                    android:layout_weight="1"
                     />
                 <ImageView
                     android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_lights_out_dot_large"
                     android:scaleType="center"
+                    android:layout_weight="1"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:visibility="invisible"
                     />
                 <ImageView
                     android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_lights_out_dot_large"
                     android:scaleType="center"
-                    />
+                    android:layout_weight="2"
+                />
             </LinearLayout>
             <View
                 android:layout_width="0dp"
